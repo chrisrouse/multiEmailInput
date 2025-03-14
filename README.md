@@ -69,3 +69,12 @@ Email addresses are validated using `/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,
 
 After typing in a valid email address, press space, enter, or tab to add the address. Space and enter will keep the focus in the text field while tab will move to the next selection.
 
+# Remove email address
+
+Click the X in the pill to remove na email address from the collection.
+
+# Outputs
+You can make everything to custom variables if you want to.
+
+
+
