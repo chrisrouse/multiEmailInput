@@ -1,0 +1,92 @@
+<template>
+    <div class="slds-form-element" role="group" aria-labelledby="email-input-label" class:slds-has-error={hasError}>
+        <div class="slds-form-element__label-container">
+            <!-- Label with required indicator -->
+            <span id="email-input-label" class="slds-form-element__label">
+                <abbr class="slds-required" title="required" if:true={required}>*</abbr>
+                {label}
+            </span>
+            
+            <!-- SLDS standard help text icon implementation -->
+            <div if:true={helpText} class="slds-form-element__icon">
+                <button 
+                    class="slds-button slds-button_icon" 
+                    title="Help" 
+                    onclick={toggleHelpPopover}
+                    aria-haspopup="dialog"
+                    type="button"
+                >
+                    <lightning-icon 
+                        icon-name="utility:info" 
+                        size="x-small"
+                        class="slds-icon-text-default"
+                    ></lightning-icon>
+                    <span class="slds-assistive-text">Help</span>
+                </button>
+                
+                <!-- Help popover with screen-aware positioning -->
+                <section if:true={showHelpPopover} 
+                    aria-label="Help information" 
+                    aria-describedby="help-popover-body" 
+                    role="dialog"
+                >
+                    <div class={popoverClass} aria-modal="true" role="dialog" style="position: absolute; z-index: 9100; left: -16px; right: auto;">
+                        <div class="slds-popover__body slds-popover__body_small">
+                            <button class="slds-button slds-button_icon slds-button_icon-small slds-float_right slds-popover__close" title="Close" onclick={closeHelpPopover}>
+                                <lightning-icon icon-name="utility:close" size="small" class="slds-icon-utility-close slds-icon_container"></lightning-icon>
+                                <span class="slds-assistive-text">Close</span>
+                            </button>
+                            <div class="slds-rich-text-editor__output" onclick={stopPropagation}>
+                                <div id="help-popover-body" class="slds-rich-text-content">
+                                    <p>{helpText}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+        
+        <div class="slds-form-element__control">
+            <!-- Input field with disabled attribute -->
+            <input 
+                type="text" 
+                id="email-input"
+                class="slds-input" 
+                placeholder={placeholder}
+                value={inputValue}
+                onkeydown={handleKeyDown}
+                onchange={handleInputChange}
+                oninput={handleInput}
+                onblur={handleBlur}
+                disabled={disabled}
+            />
+            
+            <!-- Error message - using standard SLDS positioning -->
+            <div if:true={hasError} class="slds-form-element__help" id="error-message">
+                <template if:true={isRichTextError}>
+                    <lightning-formatted-rich-text value={errorMessage}></lightning-formatted-rich-text>
+                </template>
+                <template if:false={isRichTextError}>
+                    {errorMessage}
+                </template>
+            </div>
+            
+            <!-- Email tokens container using SLDS pill container -->
+            <div class="slds-pill_container" role="listbox" aria-orientation="horizontal">
+                <template for:each={selectedEmails} for:item="email">
+                    <lightning-pill 
+                        key={email.id}
+                        label={email.value}
+                        name={email.id}
+                        onremove={handleRemoveEmail}
+                        class="slds-m-around_xx-small"
+                        disabled={disabled}
+                    >
+                        <lightning-icon icon-name="utility:email" alternative-text="Email" size="x-small"></lightning-icon>
+                    </lightning-pill>
+                </template>
+            </div>
+        </div>
+    </div>    
+</template>
