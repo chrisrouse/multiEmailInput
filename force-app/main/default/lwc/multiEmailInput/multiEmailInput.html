@@ -1,4 +1,5 @@
 <template>
+<<<<<<< HEAD
     <div class="slds-form-element" role="group" aria-labelledby="email-input-label" class:slds-has-error={hasError}>
         <div class="slds-form-element__label-container">
             <!-- Label with required indicator -->
@@ -47,10 +48,61 @@
                         </div>
                     </section>
 
+=======
+    <div class="slds-form-element">
+        <div class="slds-form-element__label-container">
+            <!-- Label with required indicator -->
+            <div class="flowruntime-input-label">
+                <label if:true={label} class="slds-form-element__label" for="email-input">
+                    <abbr class="slds-required" title="required" if:true={required}>*</abbr>
+                    {label}
+                </label>
+                
+                <!-- Custom help text icon implementation -->
+                <div if:true={helpText} class="slds-form-element__icon helptext__container">
+                    <button 
+                        class="slds-button slds-button_icon help-text__button" 
+                        title="Help" 
+                        onclick={toggleHelpPopover}
+                        aria-haspopup="dialog"
+                        type="button"
+                    >
+                        <lightning-icon 
+                            class="slds-icon-text-default slds-icon-utility-info slds-icon_container" 
+                            icon-name="utility:info" 
+                            size="x-small"
+                        ></lightning-icon>
+                        <span class="slds-assistive-text">Help</span>
+                    </button>
+                    
+                    <!-- Help popover modal -->
+                    <section if:true={showHelpPopover} 
+                        aria-label="Help information" 
+                        aria-describedby="help-popover-body" 
+                        class="help-popover slds-nubbin_bottom-left" 
+                        role="dialog"
+                    >
+                        <button 
+                            class="help-popover-close" 
+                            title="Close dialog" 
+                            onclick={closeHelpPopover}
+                        >
+                            <svg viewBox="0 0 52 52" aria-hidden="true">
+                                <path d="M31 25.4l13-13.1c.6-.6.6-1.6 0-2.2l-2-2.1c-.6-.6-1.6-.6-2.2 0L26.8 21c-.4.4-1 .4-1.4 0L12.3 8c-.6-.6-1.5-.6-2.1 0l-2.1 2.1c-.6.6-.6 1.6 0 2.2l13.1 13.1c.4.4.4 1 0 1.4L8 39.9c-.6.6-.6 1.6 0 2.2l2.1 2.1c.6.6 1.6.6 2.2 0L25.4 31c.4-.4 1-.4 1.4 0l13.1 13.1c.6.6 1.6.6 2.2 0l2.1-2.1c.6-.6.6-1.6 0-2.2L31 26.8c-.4-.4-.4-1 0-1.4z"></path>
+                            </svg>
+                            <span class="slds-assistive-text">Close dialog</span>
+                        </button>
+                        <div id="help-popover-body" class="help-popover-body">
+                            {helpText}
+                        </div>
+                    </section>
+                </div>
+>>>>>>> 879ae98 (working version)
             </div>
         </div>
         
         <div class="slds-form-element__control">
+<<<<<<< HEAD
             <!-- Input field with disabled attribute -->
             <input 
                 type="text" 
@@ -66,6 +118,25 @@
             />
             
             <!-- Error message - using standard SLDS positioning -->
+=======
+            <div class={getContainerClass}>
+                <!-- Input field with disabled attribute -->
+                <input 
+                    type="text" 
+                    id="email-input"
+                    class="slds-input" 
+                    placeholder={placeholder}
+                    value={inputValue}
+                    onkeydown={handleKeyDown}
+                    onchange={handleInputChange}
+                    oninput={handleInput}
+                    onblur={handleBlur}
+                    disabled={disabled}
+                />
+            </div>
+            
+            <!-- Error message - positioned immediately after input -->
+>>>>>>> 879ae98 (working version)
             <div if:true={hasError} class="slds-form-element__help" id="error-message">
                 <template if:true={isRichTextError}>
                     <lightning-formatted-rich-text value={errorMessage}></lightning-formatted-rich-text>
@@ -75,6 +146,7 @@
                 </template>
             </div>
             
+<<<<<<< HEAD
             <!-- Email tokens container using SLDS pill container with dynamic has-pills class -->
             <div class={pillContainerClass} role="listbox" aria-orientation="horizontal">
                 <template for:each={selectedEmails} for:item="email">
@@ -90,6 +162,21 @@
                             <lightning-icon icon-name="utility:email" alternative-text="Email" size="x-small"></lightning-icon>
                         </lightning-pill>
                     </template>
+=======
+            <!-- Email tokens container using lightning-pill -->
+            <div class="slds-listbox slds-listbox_horizontal slds-wrap pill-container" role="listbox" aria-orientation="horizontal">
+                <template for:each={selectedEmails} for:item="email">
+                    <lightning-pill 
+                        key={email.id}
+                        label={email.value}
+                        name={email.id}
+                        onremove={handleRemoveEmail}
+                        class="slds-m-around_xx-small"
+                        disabled={disabled}
+                    >
+                        <lightning-icon icon-name="utility:email" alternative-text="Email" size="x-small"></lightning-icon>
+                    </lightning-pill>
+>>>>>>> 879ae98 (working version)
                 </template>
             </div>
         </div>

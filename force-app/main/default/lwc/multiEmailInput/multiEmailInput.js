@@ -7,6 +7,7 @@ export default class MultiEmailInput extends LightningElement {
     @api required = false;
     @api helpText;
     @api maxEmails;
+<<<<<<< HEAD
     @api disabled = false;
     @api allowedDomains = '';
     @api blockedDomains = '';
@@ -15,6 +16,11 @@ export default class MultiEmailInput extends LightningElement {
     @api invalidEmailErrorMessage = '';
     @api maxEmailsErrorMessage = '';
     @api duplicateEmailErrorMessage = '';
+=======
+    @api disabled = false; // New property for disabled state
+    @api allowedDomains = ''; // Comma-separated list of allowed domains
+    @api validationErrorMessage = ''; // Custom validation error message
+>>>>>>> 879ae98 (working version)
     
     // Track internal state
     @track selectedEmails = [];
@@ -22,6 +28,7 @@ export default class MultiEmailInput extends LightningElement {
     @track errorMessage = '';
     @track hasError = false;
     @track showHelpPopover = false;
+<<<<<<< HEAD
     @track popoverPosition = 'bottom'; // Tracks if popover should appear above or below
     
     // Constants
@@ -37,6 +44,12 @@ export default class MultiEmailInput extends LightningElement {
             ? 'slds-pill_container has-pills' 
             : 'slds-pill_container';
     }
+=======
+    
+    // Private backing fields
+    _value = []; // Backing field for input value property
+    _emailCollection = []; // Backing field for output collection property
+>>>>>>> 879ae98 (working version)
     
     // Define getters and setters for input property
     @api
@@ -48,6 +61,7 @@ export default class MultiEmailInput extends LightningElement {
         this._value = value;
         // Initialize the component with pre-set values
         if (Array.isArray(value) && value.length > 0 && this.selectedEmails.length === 0) {
+<<<<<<< HEAD
             // Collect validation issues with the initial set
             const errors = [];
             
@@ -104,6 +118,9 @@ export default class MultiEmailInput extends LightningElement {
             }
             
             this.setEmails(emailsToSet);
+=======
+            this.setEmails(value);
+>>>>>>> 879ae98 (working version)
         }
     }
     
@@ -116,6 +133,7 @@ export default class MultiEmailInput extends LightningElement {
     set emailCollection(value) {
         this._emailCollection = value;
     }
+<<<<<<< HEAD
 
     // Define getter for emailList property (comma-delimited string)
     @api
@@ -137,6 +155,19 @@ export default class MultiEmailInput extends LightningElement {
         return this.ABSOLUTE_MAX_EMAILS;
     }
          
+=======
+         
+    // Computed property to determine container class based on error state
+    get getContainerClass() {
+        return this.hasError ? 'slds-has-error' : '';
+    }
+    
+    // Computed property to determine pill wrapper class based on disabled state
+    get getPillClass() {
+        return `pill-wrapper ${this.disabled ? 'pill-disabled' : ''}`;
+    }
+    
+>>>>>>> 879ae98 (working version)
     // Check if error message contains HTML tags (rich text)
     get isRichTextError() {
         return this.errorMessage && (
@@ -155,12 +186,18 @@ export default class MultiEmailInput extends LightningElement {
         
         // Clear error state as soon as user starts typing
         if (this.hasError) {
+<<<<<<< HEAD
             this.clearErrorState();
+=======
+            this.hasError = false;
+            this.errorMessage = '';
+>>>>>>> 879ae98 (working version)
         }
         
         // Update inputValue each time a key is pressed
         this.inputValue = event.target.value;
         
+<<<<<<< HEAD
         // Handle Enter key, Space key, and Tab key
         if (event.key === 'Enter' || event.key === ' ' || event.code === 'Space' || event.key === 'Tab') {
             // Get the current value directly from the input element
@@ -179,10 +216,47 @@ export default class MultiEmailInput extends LightningElement {
                 this.validateAndAddEmail(currentValue);
             }
         }
+=======
+        // If Enter key is pressed
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            event.stopPropagation();
+            
+            // Get the current value directly from the input element for maximum reliability
+            const currentValue = event.target.value;
+            if (currentValue && currentValue.trim()) {
+                this.validateAndAddEmail(currentValue);
+            }
+        }
+        
+        // If Space key is pressed
+        else if (event.key === ' ' || event.code === 'Space') {
+            // Get the current value directly from the input element
+            const currentValue = event.target.value;
+            
+            // Only prevent default and add if there's already content (without the space)
+            if (currentValue && currentValue.trim()) {
+                event.preventDefault();
+                event.stopPropagation();
+                this.validateAndAddEmail(currentValue);
+            }
+        }
+        
+        // Special handling for Tab key for accessibility
+        else if (event.key === 'Tab') {
+            // Only add the email if there's content
+            const currentValue = event.target.value;
+            if (currentValue && currentValue.trim()) {
+                this.validateAndAddEmail(currentValue);
+                // Don't prevent default so tab navigation works
+            }
+        }
+>>>>>>> 879ae98 (working version)
     }
     
     // Handle input event to clear error state immediately on any input
     handleInput(event) {
+<<<<<<< HEAD
         if (!this.disabled) {
             // Update inputValue
             this.inputValue = event.target.value;
@@ -191,6 +265,11 @@ export default class MultiEmailInput extends LightningElement {
             if (this.hasError) {
                 this.clearErrorState();
             }
+=======
+        if (!this.disabled && this.hasError) {
+            this.hasError = false;
+            this.errorMessage = '';
+>>>>>>> 879ae98 (working version)
         }
     }
     
@@ -198,6 +277,7 @@ export default class MultiEmailInput extends LightningElement {
     handleInputChange(event) {
         if (!this.disabled) {
             this.inputValue = event.target.value;
+<<<<<<< HEAD
         }
     }
     
@@ -207,6 +287,17 @@ export default class MultiEmailInput extends LightningElement {
         this.errorMessage = '';
     }
     
+=======
+            
+            // Clear error state as soon as user starts typing
+            if (this.hasError) {
+                this.hasError = false;
+                this.errorMessage = '';
+            }
+        }
+    }
+    
+>>>>>>> 879ae98 (working version)
     // Handle when input field loses focus
     handleBlur(event) {
         if (this.disabled) return;
@@ -218,6 +309,7 @@ export default class MultiEmailInput extends LightningElement {
         }
     }
     
+<<<<<<< HEAD
     // Method to set error state with a message
     setError(message) {
         this.hasError = true;
@@ -233,6 +325,9 @@ export default class MultiEmailInput extends LightningElement {
     }
     
     // Method to validate and add emails
+=======
+    // New method to validate and add emails
+>>>>>>> 879ae98 (working version)
     validateAndAddEmail(emailValue) {
         const email = emailValue.trim();
         
@@ -240,14 +335,31 @@ export default class MultiEmailInput extends LightningElement {
         
         // First validate basic email format
         if (!this.isValidEmail(email)) {
+<<<<<<< HEAD
             if (this.invalidEmailErrorMessage && this.invalidEmailErrorMessage.trim() !== '') {
                 this.setError(this.invalidEmailErrorMessage);
             } else {
                 this.setError('Please enter a valid email address.');
+=======
+            this.hasError = true;
+            this.errorMessage = 'Please enter a valid email address';
+            return;
+        }
+        
+        // Then validate against allowed domains
+        if (!this.isValidDomain(email)) {
+            this.hasError = true;
+            // Use custom validation error message if provided, otherwise use default
+            if (this.validationErrorMessage && this.validationErrorMessage.trim() !== '') {
+                this.errorMessage = this.validationErrorMessage;
+            } else {
+                this.errorMessage = 'Email domain is not allowed';
+>>>>>>> 879ae98 (working version)
             }
             return;
         }
         
+<<<<<<< HEAD
         // Then validate against domain rules
         const domainValidation = this.isDomainValid(email);
         if (!domainValidation.isValid) {
@@ -268,16 +380,27 @@ export default class MultiEmailInput extends LightningElement {
             } else {
                 this.setError(`You can only add up to ${effectiveMaxEmails} email addresses.`);
             }
+=======
+        // Check if we've reached maximum emails (if specified)
+        if (this.maxEmails && this.selectedEmails.length >= this.maxEmails) {
+            this.hasError = true;
+            this.errorMessage = `You can only add up to ${this.maxEmails} email addresses`;
+>>>>>>> 879ae98 (working version)
             return;
         }
         
         // Check if email is already added
         if (this.selectedEmails.some(item => item.value.toLowerCase() === email.toLowerCase())) {
+<<<<<<< HEAD
             if (this.duplicateEmailErrorMessage && this.duplicateEmailErrorMessage.trim() !== '') {
                 this.setError(this.duplicateEmailErrorMessage);
             } else {
                 this.setError('This email has already been added.');
             }
+=======
+            this.hasError = true;
+            this.errorMessage = 'This email has already been added';
+>>>>>>> 879ae98 (working version)
             return;
         }
         
@@ -291,7 +414,12 @@ export default class MultiEmailInput extends LightningElement {
         // Clear input and error state
         this.inputValue = '';
         this.template.querySelector('input').value = '';
+<<<<<<< HEAD
         this.clearErrorState();
+=======
+        this.hasError = false;
+        this.errorMessage = '';
+>>>>>>> 879ae98 (working version)
         
         // Dispatch change event
         this.dispatchValueChangedEvent();
@@ -336,6 +464,7 @@ export default class MultiEmailInput extends LightningElement {
     }
     
     // Validate email domain against allowed domains list
+<<<<<<< HEAD
 isDomainValid(email) {
     // Extract domain from email
     const domain = email.split('@')[1]?.toLowerCase();
@@ -367,11 +496,25 @@ isDomainValid(email) {
     
     // If allowed domains are specified, domain must match at least one
     if (hasAllowedDomains) {
+=======
+    isValidDomain(email) {
+        // If no allowed domains specified, all domains are valid
+        if (!this.allowedDomains || this.allowedDomains.trim() === '') {
+            return true;
+        }
+        
+        // Extract domain from email
+        const domain = email.split('@')[1]?.toLowerCase();
+        if (!domain) return false;
+        
+        // Split allowed domains by comma and trim each entry
+>>>>>>> 879ae98 (working version)
         const allowedDomainsList = this.allowedDomains
             .split(',')
             .map(d => d.trim().toLowerCase())
             .filter(d => d !== '');
             
+<<<<<<< HEAD
         // Check if the email domain matches any allowed pattern
         const isAllowed = allowedDomainsList.some(allowedDomain => 
             this.domainMatchesPattern(domain, allowedDomain));
@@ -402,6 +545,10 @@ isDomainValid(email) {
         }
         
         return false;
+=======
+        // Check if the email domain is in the allowed list
+        return allowedDomainsList.some(allowedDomain => domain === allowedDomain);
+>>>>>>> 879ae98 (working version)
     }
     
     // Generate a unique ID for each email entry
@@ -421,6 +568,7 @@ isDomainValid(email) {
         // Dispatch Flow attribute change event for the output collection
         this.dispatchEvent(new FlowAttributeChangeEvent('emailCollection', emailValues));
         
+<<<<<<< HEAD
         // Also dispatch a Flow attribute change event for the comma-delimited email list
         this.dispatchEvent(new FlowAttributeChangeEvent('emailList', emailValues.join(',')));
         
@@ -429,6 +577,12 @@ isDomainValid(email) {
             detail: {
                 emails: emailValues,
                 emailList: emailValues.join(',')
+=======
+        // Also dispatch a regular event for non-Flow usages
+        this.dispatchEvent(new CustomEvent('emailschanged', {
+            detail: {
+                emails: emailValues
+>>>>>>> 879ae98 (working version)
             }
         }));
     }
@@ -444,7 +598,12 @@ isDomainValid(email) {
         if (inputElement) {
             inputElement.value = '';
         }
+<<<<<<< HEAD
         this.clearErrorState();
+=======
+        this.hasError = false;
+        this.errorMessage = '';
+>>>>>>> 879ae98 (working version)
         this.dispatchValueChangedEvent();
     }
 
@@ -467,6 +626,7 @@ isDomainValid(email) {
     // Standard DOM validation method - required for Flow to validate properly
     @api
     checkValidity() {
+<<<<<<< HEAD
         // Collect all validation errors
         const errors = this.collectValidationErrors();
         
@@ -546,13 +706,56 @@ collectValidationErrors() {
             this.clearErrorState();
             return true;
         }
+=======
+        // Field is valid if it's not required OR if it has at least one email
+        return !this.required || this.selectedEmails.length > 0;
+    }
+
+    // Standard DOM validation method - required for Flow to validate properly
+    @api
+    reportValidity() {
+        const valid = this.checkValidity();
+        
+        if (!valid) {
+            this.hasError = true;
+            this.errorMessage = 'Please enter at least one email address';
+        } else {
+            this.hasError = false;
+            this.errorMessage = '';
+        }
+        
+        return valid;
+>>>>>>> 879ae98 (working version)
     }
     
     // Keep the original validate method for backward compatibility
     @api
     validate() {
+<<<<<<< HEAD
         // Perform full validation using reportValidity
         const isValid = this.reportValidity();
+=======
+        // First check if the field is required and has values
+        let isValid = this.reportValidity();
+        
+        // If validation formula is provided, validate all emails again
+        if (isValid && this.allowedDomains && this.allowedDomains.trim() !== '' && this.selectedEmails.length > 0) {
+            // Check if all emails pass the domain validation
+            const invalidEmail = this.selectedEmails.find(emailObj => {
+                return !this.isValidDomain(emailObj.value);
+            });
+            
+            if (invalidEmail) {
+                isValid = false;
+                this.hasError = true;
+                if (this.validationErrorMessage && this.validationErrorMessage.trim() !== '') {
+                    this.errorMessage = this.validationErrorMessage;
+                } else {
+                    this.errorMessage = 'One or more emails has an invalid domain';
+                }
+            }
+        }
+>>>>>>> 879ae98 (working version)
         
         if (isValid) {
             return { isValid: true };
@@ -573,6 +776,7 @@ collectValidationErrors() {
         // Toggle popover state
         this.showHelpPopover = !this.showHelpPopover;
         
+<<<<<<< HEAD
         // If opening the popover, determine position and add document click listener
         if (this.showHelpPopover) {
             // Calculate if we need to show popover above or below based on viewport position
@@ -633,6 +837,20 @@ collectValidationErrors() {
             : 'slds-popover slds-nubbin_bottom-left';
     }
     
+=======
+        // If opening the popover, add document click listener to close it when clicking outside
+        if (this.showHelpPopover) {
+            // Use setTimeout to avoid the current click event from immediately closing the popover
+            setTimeout(() => {
+                document.addEventListener('click', this.handleDocumentClick);
+            }, 10);
+        } else {
+            // If closing, remove the listener
+            this.removeDocumentClickListener();
+        }
+    }
+
+>>>>>>> 879ae98 (working version)
     // Close help popover
     closeHelpPopover(event) {
         // Prevent event from bubbling up
@@ -646,6 +864,7 @@ collectValidationErrors() {
         
         // Remove document click listener
         this.removeDocumentClickListener();
+<<<<<<< HEAD
         
         // Return focus to the help button for keyboard accessibility
         const helpButton = this.template.querySelector('.slds-button_icon');
@@ -664,6 +883,15 @@ collectValidationErrors() {
         // Get references to popover and button elements
         const popoverElement = this.template.querySelector('.slds-popover');
         const helpButton = this.template.querySelector('.slds-button_icon');
+=======
+    }
+
+    // Handle document click to close popover when clicking outside
+    handleDocumentClick = (event) => {
+        // Get references to popover and button elements
+        const popoverElement = this.template.querySelector('.help-popover');
+        const helpButton = this.template.querySelector('.help-text__button');
+>>>>>>> 879ae98 (working version)
         
         // Check if click is outside both the popover and help button
         if (popoverElement && helpButton && 
@@ -674,6 +902,7 @@ collectValidationErrors() {
             this.closeHelpPopover();
         }
     }
+<<<<<<< HEAD
     
     // Handle Escape key for accessibility
     handleEscapeKey = (event) => {
@@ -682,14 +911,24 @@ collectValidationErrors() {
             this.closeHelpPopover();
         }
     }
+=======
+>>>>>>> 879ae98 (working version)
 
     // Helper to remove document click listener
     removeDocumentClickListener() {
         document.removeEventListener('click', this.handleDocumentClick);
+<<<<<<< HEAD
         document.removeEventListener('keydown', this.handleEscapeKey);
+=======
+>>>>>>> 879ae98 (working version)
     }
 
     // Clean up event listeners when component is removed
     disconnectedCallback() {
         this.removeDocumentClickListener();
+<<<<<<< HEAD
     }}
+=======
+    }
+}
+>>>>>>> 879ae98 (working version)

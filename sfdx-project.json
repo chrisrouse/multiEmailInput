@@ -2,6 +2,7 @@
   "packageDirectories": [
     {
       "path": "force-app",
+<<<<<<< HEAD
       "default": true,
       "package": "Multi Email Input",
       "versionName": "Version 1.1.2",
@@ -34,3 +35,13 @@
     "Multi Email Input@1.1.2-1": "04tHo000000tBkaIAE"
   }
 }
+=======
+      "default": true
+    }
+  ],
+  "name": "multiEmailInput",
+  "namespace": "",
+  "sfdcLoginUrl": "https://login.salesforce.com",
+  "sourceApiVersion": "63.0"
+}
+>>>>>>> 879ae98 (working version)

@@ -4,5 +4,12 @@
     "**/bower_components": true,
     "**/.sfdx": true
   },
+<<<<<<< HEAD
   "workbench.colorCustomizations": {}
+=======
+  "workbench.colorCustomizations": {
+    "statusBar.background": "#2f53a8",
+    "activityBar.background": "#2f53a8"
+  }
+>>>>>>> 879ae98 (working version)
 }
