@@ -17,7 +17,7 @@ This component has several customizable fields.
 1. **API Name** You know this field!
 2. **Allowed Domains** Input a comma-seperated list of domains. This can be created with a text collection or as plain text. *Example: gmail.com, yahoo.com, aol.com*.
 3. **Allowed Domains Error Message** Enter a custom error message. This supports plain text, a text string, or rich text. If you use plain text or a text string, the message is displayed using the standard Salesforce validation error style. Rich text is fully formatted.
-4. **Disabled** Set this to true or false using a global variable or a formula.
+4. **Disabled** Set this to true or false using a global variable or a formula. When Disabled=TRUE, pills are hidden.
 5. **Help Text** Add useful help text for your users. Support plain text or a flow resource. Does not support rich text.
 6. **Label** Give your field a name.
 7. **Maximum Emails** Limit how many emails your user can add. Leave blank if you don't want to limit this.

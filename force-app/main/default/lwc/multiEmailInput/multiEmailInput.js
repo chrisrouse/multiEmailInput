@@ -33,7 +33,48 @@ export default class MultiEmailInput2 extends LightningElement {
         this._value = value;
         // Initialize the component with pre-set values
         if (Array.isArray(value) && value.length > 0 && this.selectedEmails.length === 0) {
-            this.setEmails(value);
+            // Collect validation issues with the initial set
+            const errors = [];
+            
+            // Check max emails constraint
+            if (this.maxEmails && value.length > this.maxEmails) {
+                errors.push(`You can only add up to ${this.maxEmails} email addresses`);
+            }
+            
+            // Check domain validation if needed
+            if (this.allowedDomains && this.allowedDomains.trim() !== '') {
+                // Find any emails with invalid domains
+                const invalidEmails = value.filter(email => !this.isValidDomain(email));
+                if (invalidEmails.length > 0) {
+                    if (this.validationErrorMessage && this.validationErrorMessage.trim() !== '') {
+                        errors.push(this.validationErrorMessage);
+                    } else {
+                        errors.push('One or more emails has an invalid domain');
+                    }
+                }
+            }
+            
+            // Set error state if needed
+            if (errors.length > 0) {
+                this.hasError = true;
+                
+                // Show combined error message if multiple issues
+                if (errors.length === 1) {
+                    this.errorMessage = errors[0];
+                } else {
+                    this.errorMessage = '<ul style="margin-left: 1rem; list-style-type: disc;">' + 
+                        errors.map(err => `<li>${err}</li>`).join('') + 
+                        '</ul>';
+                }
+            }
+            
+            // Always set the emails, but respect the maxEmails limit
+            let emailsToSet = value;
+            if (this.maxEmails && value.length > this.maxEmails) {
+                emailsToSet = value.slice(0, this.maxEmails);
+            }
+            
+            this.setEmails(emailsToSet);
         }
     }
     
@@ -133,7 +174,7 @@ export default class MultiEmailInput2 extends LightningElement {
         // First validate basic email format
         if (!this.isValidEmail(email)) {
             this.hasError = true;
-            this.errorMessage = 'Please enter a valid email address.';
+            this.errorMessage = 'Please enter a valid email address';
             return;
         }
         
@@ -144,7 +185,7 @@ export default class MultiEmailInput2 extends LightningElement {
             if (this.validationErrorMessage && this.validationErrorMessage.trim() !== '') {
                 this.errorMessage = this.validationErrorMessage;
             } else {
-                this.errorMessage = 'Email domain is not allowed.';
+                this.errorMessage = 'Email domain is not allowed';
             }
             return;
         }
@@ -152,14 +193,14 @@ export default class MultiEmailInput2 extends LightningElement {
         // Check if we've reached maximum emails (if specified)
         if (this.maxEmails && this.selectedEmails.length >= this.maxEmails) {
             this.hasError = true;
-            this.errorMessage = `You can only add up to ${this.maxEmails} email addresses.`;
+            this.errorMessage = `You can only add up to ${this.maxEmails} email addresses`;
             return;
         }
         
         // Check if email is already added
         if (this.selectedEmails.some(item => item.value.toLowerCase() === email.toLowerCase())) {
             this.hasError = true;
-            this.errorMessage = 'This email has already been added.';
+            this.errorMessage = 'This email has already been added';
             return;
         }
         
@@ -299,49 +340,77 @@ export default class MultiEmailInput2 extends LightningElement {
     // Standard DOM validation method - required for Flow to validate properly
     @api
     checkValidity() {
-        // Field is valid if it's not required OR if it has at least one email
-        return !this.required || this.selectedEmails.length > 0;
+        // Collect all validation errors
+        const errors = this.collectValidationErrors();
+        
+        // The field is valid if there are no errors
+        return errors.length === 0;
     }
 
-    // Standard DOM validation method - required for Flow to validate properly
-    @api
-    reportValidity() {
-        const valid = this.checkValidity();
+    // Helper method to collect all validation errors
+    collectValidationErrors() {
+        const errors = [];
         
-        if (!valid) {
-            this.hasError = true;
-            this.errorMessage = 'Please enter at least one email address';
-        } else {
-            this.hasError = false;
-            this.errorMessage = '';
+        // Check if required field has values
+        if (this.required && this.selectedEmails.length === 0) {
+            errors.push('Please enter at least one email address');
         }
         
-        return valid;
-    }
-    
-    // Keep the original validate method for backward compatibility
-    @api
-    validate() {
-        // First check if the field is required and has values
-        let isValid = this.reportValidity();
+        // Check if we're exceeding max emails
+        if (this.maxEmails && this.selectedEmails.length > this.maxEmails) {
+            errors.push(`You can only add up to ${this.maxEmails} email addresses`);
+        }
         
-        // If validation formula is provided, validate all emails again
-        if (isValid && this.allowedDomains && this.allowedDomains.trim() !== '' && this.selectedEmails.length > 0) {
+        // Check domain validation if needed
+        if (this.allowedDomains && this.allowedDomains.trim() !== '' && this.selectedEmails.length > 0) {
             // Check if all emails pass the domain validation
             const invalidEmail = this.selectedEmails.find(emailObj => {
                 return !this.isValidDomain(emailObj.value);
             });
             
             if (invalidEmail) {
-                isValid = false;
-                this.hasError = true;
                 if (this.validationErrorMessage && this.validationErrorMessage.trim() !== '') {
-                    this.errorMessage = this.validationErrorMessage;
+                    errors.push(this.validationErrorMessage);
                 } else {
-                    this.errorMessage = 'One or more emails has an invalid domain';
+                    errors.push('One or more emails has an invalid domain');
                 }
             }
         }
+        
+        return errors;
+    }
+
+    // Standard DOM validation method - required for Flow to validate properly
+    @api
+    reportValidity() {
+        // Collect all validation errors
+        const errors = this.collectValidationErrors();
+        
+        // Set error state based on validation results
+        if (errors.length > 0) {
+            this.hasError = true;
+            // Combine all error messages with line breaks for rich text display
+            if (errors.length === 1) {
+                this.errorMessage = errors[0];
+            } else {
+                // Create a rich text error message with multiple points
+                this.errorMessage = '<ul style="margin-left: 1rem; list-style-type: disc;">' + 
+                    errors.map(err => `<li>${err}</li>`).join('') + 
+                    '</ul>';
+            }
+            return false;
+        } else {
+            this.hasError = false;
+            this.errorMessage = '';
+            return true;
+        }
+    }
+    
+    // Keep the original validate method for backward compatibility
+    @api
+    validate() {
+        // Perform full validation using reportValidity
+        const isValid = this.reportValidity();
         
         if (isValid) {
             return { isValid: true };

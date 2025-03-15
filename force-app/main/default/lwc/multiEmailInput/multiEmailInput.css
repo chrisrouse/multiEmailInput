@@ -1,4 +1,4 @@
-/* multiEmailInput2.css - Using SLDS standard classes where possible */
+/* multiEmailInput.css - Using SLDS standard classes where possible */
 
 /* Standard error message styling to match native Salesforce styling */
 .slds-form-element__help {
@@ -18,12 +18,6 @@
     margin: 0;
 }
 
-/* Add proper disabled styling for pills when component is disabled */
-lightning-pill[disabled] {
-    opacity: 0.5;
-    pointer-events: none;
-}
-
 /* Pill container without border */
 .slds-pill_container {
     display: flex;
@@ -32,87 +26,46 @@ lightning-pill[disabled] {
     border: none;
 }
 
-/* Help popover styling with screen aware positioning */
-.help-popover {
-    position: absolute;
-    z-index: 7000;
-    min-width: 280px;
-    max-width: 320px;
-    background: white;
-    border-radius: 4px;
-    box-shadow: 0 2px 3px 0 rgba(0, 0, 0, 0.16);
-    border: 1px solid #d9dbdd;
+/* Ensure the form element has the right spacing */
+.slds-form-element {
+    margin-bottom: 0.5rem;
 }
 
-/* Top position (default) */
-.help-popover.slds-nubbin_bottom-left {
+/* Ensure popover positions correctly */
+.slds-popover {
+    position: absolute;
+    z-index: 9100;
+    min-width: 280px;
+    max-width: 320px;
+    border-radius: var(--lwc-borderRadiusMedium, 0.25rem);
+    width: var(--lwc-sizeMedium, 20rem);
+    min-height: 2rem;
+    background-color: var(--slds-g-color-neutral-base-100, var(--lwc-colorBackgroundAlt, rgb(255, 255, 255)));
+    display: inline-block;
+    box-shadow: 0 2px 3px 0 rgba(0, 0, 0, 0.16);
+    border: var(--lwc-borderWidthThin, 1px) solid var(--slds-g-color-border-base-1, var(--lwc-colorBorder, rgb(201, 201, 201)));
+}
+
+.slds-popover p {
+    color: #181818;
+}
+
+/* Position for top-aligned popover */
+.slds-popover.slds-nubbin_bottom-left {
     bottom: calc(100% + 8px);
     left: -16px;
 }
 
-/* Bottom position (when near top of viewport) */
-.help-popover.slds-nubbin_top-left {
-    top: calc(100% + 8px) !important;
+/* Position for bottom-aligned popover */
+.slds-popover.slds-nubbin_top-left {
+    top: calc(100% + 8px);
     left: -16px;
 }
 
-/* Customized nubbin position */
-.help-popover.slds-nubbin_bottom-left:before,
-.help-popover.slds-nubbin_bottom-left:after,
-.help-popover.slds-nubbin_top-left:before,
-.help-popover.slds-nubbin_top-left:after {
+/* Ensure the nubbin is positioned correctly */
+.slds-popover.slds-nubbin_bottom-left::before,
+.slds-popover.slds-nubbin_bottom-left::after,
+.slds-popover.slds-nubbin_top-left::before,
+.slds-popover.slds-nubbin_top-left::after {
     left: 1.5rem;
-}
-
-/* Help popover body */
-.help-popover-body {
-    padding: 16px 36px 16px 16px;
-    font-size: 12px;
-    line-height: 1.5;
-    color: #3e3e3c;
-}
-
-/* Close button styling */
-.help-popover-close {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    width: 24px;
-    height: 24px;
-    padding: 0;
-    background: none;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 4px;
-}
-
-/* Apply specific styling to the close icon */
-.slds-popover__close lightning-icon {
-    --sds-c-icon-color-foreground: var(--slds-c-icon-color-foreground, var(--sds-c-icon-color-foreground, var(--slds-g-color-neutral-base-100, var(--lwc-colorTextIconInverse,rgb(255, 255, 255)))));
-}
-
-/* Add focus styling for accessibility */
-.help-popover-close:focus {
-    outline: none;
-    box-shadow: 0 0 3px 0 #0070d2;
-}
-
-/* Animation for popover */
-@keyframes slds-popover-show {
-    from {
-        opacity: 0;
-        transform: translateY(8px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Ensure the form element has the right spacing */
-.slds-form-element {
-    margin-bottom: 0.5rem;
 }

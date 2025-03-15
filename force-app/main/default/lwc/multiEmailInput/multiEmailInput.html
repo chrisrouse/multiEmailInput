@@ -26,24 +26,27 @@
                 
                 <!-- Help popover with screen-aware positioning -->
                 <section if:true={showHelpPopover} 
-                    aria-label="Help information" 
-                    aria-describedby="help-popover-body" 
-                    role="dialog"
-                >
-                    <div class={popoverClass} aria-modal="true" role="dialog" style="position: absolute; z-index: 9100; left: -16px; right: auto;">
-                        <div class="slds-popover__body slds-popover__body_small">
-                            <button class="slds-button slds-button_icon slds-button_icon-small slds-float_right slds-popover__close" title="Close" onclick={closeHelpPopover}>
-                                <lightning-icon icon-name="utility:close" size="small" class="slds-icon-utility-close slds-icon_container"></lightning-icon>
+                        class={popoverClass} 
+                        aria-label="Help information" 
+                        aria-describedby="help-popover-body" 
+                        role="dialog"
+                        style="position: absolute; z-index: 9100; left: -16px; right: auto;">
+                        
+                        <div class="slds-popover__body">
+                            <button class="slds-button slds-button_icon slds-button_icon-small slds-float_right slds-popover__close" 
+                                title="Close" 
+                                onclick={closeHelpPopover}>
+                                <lightning-icon icon-name="utility:close" size="small" class="slds-icon-utility-close"></lightning-icon>
                                 <span class="slds-assistive-text">Close</span>
                             </button>
-                            <div class="slds-rich-text-editor__output" onclick={stopPropagation}>
+                            <div class="slds-rich-text-editor__output">
                                 <div id="help-popover-body" class="slds-rich-text-content">
                                     <p>{helpText}</p>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </section>
+                    </section>
+
             </div>
         </div>
         
@@ -75,16 +78,18 @@
             <!-- Email tokens container using SLDS pill container -->
             <div class="slds-pill_container" role="listbox" aria-orientation="horizontal">
                 <template for:each={selectedEmails} for:item="email">
-                    <lightning-pill 
-                        key={email.id}
-                        label={email.value}
-                        name={email.id}
-                        onremove={handleRemoveEmail}
-                        class="slds-m-around_xx-small"
-                        disabled={disabled}
-                    >
-                        <lightning-icon icon-name="utility:email" alternative-text="Email" size="x-small"></lightning-icon>
-                    </lightning-pill>
+                    <!-- Render enabled pills with remove button -->
+                    <template if:false={disabled}>
+                        <lightning-pill 
+                            key={email.id}
+                            label={email.value}
+                            name={email.id}
+                            onremove={handleRemoveEmail}
+                            class="slds-m-around_xx-small"
+                        >
+                            <lightning-icon icon-name="utility:email" alternative-text="Email" size="x-small"></lightning-icon>
+                        </lightning-pill>
+                    </template>
                 </template>
             </div>
         </div>
