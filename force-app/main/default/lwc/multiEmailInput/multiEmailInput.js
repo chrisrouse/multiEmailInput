@@ -133,7 +133,7 @@ export default class MultiEmailInput2 extends LightningElement {
         // First validate basic email format
         if (!this.isValidEmail(email)) {
             this.hasError = true;
-            this.errorMessage = 'Please enter a valid email address';
+            this.errorMessage = 'Please enter a valid email address.';
             return;
         }
         
@@ -144,7 +144,7 @@ export default class MultiEmailInput2 extends LightningElement {
             if (this.validationErrorMessage && this.validationErrorMessage.trim() !== '') {
                 this.errorMessage = this.validationErrorMessage;
             } else {
-                this.errorMessage = 'Email domain is not allowed';
+                this.errorMessage = 'Email domain is not allowed.';
             }
             return;
         }
@@ -152,14 +152,14 @@ export default class MultiEmailInput2 extends LightningElement {
         // Check if we've reached maximum emails (if specified)
         if (this.maxEmails && this.selectedEmails.length >= this.maxEmails) {
             this.hasError = true;
-            this.errorMessage = `You can only add up to ${this.maxEmails} email addresses`;
+            this.errorMessage = `You can only add up to ${this.maxEmails} email addresses.`;
             return;
         }
         
         // Check if email is already added
         if (this.selectedEmails.some(item => item.value.toLowerCase() === email.toLowerCase())) {
             this.hasError = true;
-            this.errorMessage = 'This email has already been added';
+            this.errorMessage = 'This email has already been added.';
             return;
         }
         
