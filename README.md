@@ -1,5 +1,7 @@
 # Hello, World!
 
+**This is a learning project for me and I might accidentally break something at any time! Use this at your own risk and only if you're comfortable editing an LWC in VS Code to try to fix errors and bugs.**
+
 Thanks for checking out the Multi Email Input LWC for Salesforce Screen Flows! I built this package because I couldn't find any other component that did what I wanted. While working on a form being built in a screen flow for a client, I had a requirement to allow the end users to enter several additional emails. This fine, users can enter it in a text box and I can process it after, but what if there was an easier way??? Enter **Multi Email Input**! No more formulas or loops to parse user data that may or may not follow a consistent pattern. No clunky repeater element to deal with. This is a simple way to capture as many additional email addresses as your end user wants to enter!
 
 This component works with SLDS1 and SLDS2. It looks great in SLDS2!
