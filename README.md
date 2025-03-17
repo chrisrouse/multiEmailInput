@@ -59,7 +59,7 @@ Limit how many emails a user can enter. When they try to enter n+1, they are sho
 <img width="843" alt="Screenshot 2025-03-14 at 5 35 13 PM" src="https://github.com/user-attachments/assets/6ed98f04-737d-4584-a1b1-ae8780e8a180" />
 
 ## Invalid Emals
-Email addresses are validated using `/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/`. This error message cannot be configured.
+Email addresses are validated with a bit of regex to ensure general compatibility with email systems. This error message is not currently customizable. 
 
 <img width="455" alt="Screenshot 2025-03-14 at 5 37 13 PM" src="https://github.com/user-attachments/assets/3457c4b8-c328-4b39-96ca-5dc805a1d700" />
 
