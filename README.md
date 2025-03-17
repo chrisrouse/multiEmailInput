@@ -78,5 +78,5 @@ Click the X in the pill to remove na email address from the collection.
 # Outputs
 You can make everything to custom variables if you want to.
 
-
-
+# Known Issues and Limitations
+1. If your initial collection (Value) does not meet the limits of Allowed Domains and Maximum Emails, it will not be evaluated until you attempt to add another value to the collection or when you advance to the next screen. It is not evaluated at the initial loading of the screen.

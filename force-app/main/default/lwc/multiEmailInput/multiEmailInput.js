@@ -106,8 +106,7 @@ export default class MultiEmailInput2 extends LightningElement {
         
         // Clear error state as soon as user starts typing
         if (this.hasError) {
-            this.hasError = false;
-            this.errorMessage = '';
+            this.clearErrorState();
         }
         
         // Update inputValue each time a key is pressed
@@ -135,9 +134,14 @@ export default class MultiEmailInput2 extends LightningElement {
     
     // Handle input event to clear error state immediately on any input
     handleInput(event) {
-        if (!this.disabled && this.hasError) {
-            this.hasError = false;
-            this.errorMessage = '';
+        if (!this.disabled) {
+            // Update inputValue
+            this.inputValue = event.target.value;
+            
+            // Clear error state as soon as user starts typing
+            if (this.hasError) {
+                this.clearErrorState();
+            }
         }
     }
     
@@ -145,13 +149,13 @@ export default class MultiEmailInput2 extends LightningElement {
     handleInputChange(event) {
         if (!this.disabled) {
             this.inputValue = event.target.value;
-            
-            // Clear error state as soon as user starts typing
-            if (this.hasError) {
-                this.hasError = false;
-                this.errorMessage = '';
-            }
         }
+    }
+    
+    // Helper to clear error state
+    clearErrorState() {
+        this.hasError = false;
+        this.errorMessage = '';
     }
     
     // Handle when input field loses focus
@@ -165,7 +169,13 @@ export default class MultiEmailInput2 extends LightningElement {
         }
     }
     
-    // New method to validate and add emails
+    // Method to set error state with a message
+    setError(message) {
+        this.hasError = true;
+        this.errorMessage = message;
+    }
+    
+    // Method to validate and add emails
     validateAndAddEmail(emailValue) {
         const email = emailValue.trim();
         
@@ -173,34 +183,30 @@ export default class MultiEmailInput2 extends LightningElement {
         
         // First validate basic email format
         if (!this.isValidEmail(email)) {
-            this.hasError = true;
-            this.errorMessage = 'Please enter a valid email address';
+            this.setError('Please enter a valid email address');
             return;
         }
         
         // Then validate against allowed domains
         if (!this.isValidDomain(email)) {
-            this.hasError = true;
             // Use custom validation error message if provided, otherwise use default
             if (this.validationErrorMessage && this.validationErrorMessage.trim() !== '') {
-                this.errorMessage = this.validationErrorMessage;
+                this.setError(this.validationErrorMessage);
             } else {
-                this.errorMessage = 'Email domain is not allowed';
+                this.setError('Email domain is not allowed');
             }
             return;
         }
         
         // Check if we've reached maximum emails (if specified)
         if (this.maxEmails && this.selectedEmails.length >= this.maxEmails) {
-            this.hasError = true;
-            this.errorMessage = `You can only add up to ${this.maxEmails} email addresses`;
+            this.setError(`You can only add up to ${this.maxEmails} email addresses`);
             return;
         }
         
         // Check if email is already added
         if (this.selectedEmails.some(item => item.value.toLowerCase() === email.toLowerCase())) {
-            this.hasError = true;
-            this.errorMessage = 'This email has already been added';
+            this.setError('This email has already been added');
             return;
         }
         
@@ -214,8 +220,7 @@ export default class MultiEmailInput2 extends LightningElement {
         // Clear input and error state
         this.inputValue = '';
         this.template.querySelector('input').value = '';
-        this.hasError = false;
-        this.errorMessage = '';
+        this.clearErrorState();
         
         // Dispatch change event
         this.dispatchValueChangedEvent();
@@ -316,8 +321,7 @@ export default class MultiEmailInput2 extends LightningElement {
         if (inputElement) {
             inputElement.value = '';
         }
-        this.hasError = false;
-        this.errorMessage = '';
+        this.clearErrorState();
         this.dispatchValueChangedEvent();
     }
 
@@ -347,6 +351,19 @@ export default class MultiEmailInput2 extends LightningElement {
         return errors.length === 0;
     }
 
+    // Helper method to format error messages as rich text when needed
+    formatErrorMessages(errors) {
+        if (errors.length === 0) {
+            return '';
+        } else if (errors.length === 1) {
+            return errors[0];
+        } else {
+            return '<ul style="margin-left: 1rem; list-style-type: disc;">' + 
+                errors.map(err => `<li>${err}</li>`).join('') + 
+                '</ul>';
+        }
+    }
+    
     // Helper method to collect all validation errors
     collectValidationErrors() {
         const errors = [];
@@ -389,19 +406,10 @@ export default class MultiEmailInput2 extends LightningElement {
         // Set error state based on validation results
         if (errors.length > 0) {
             this.hasError = true;
-            // Combine all error messages with line breaks for rich text display
-            if (errors.length === 1) {
-                this.errorMessage = errors[0];
-            } else {
-                // Create a rich text error message with multiple points
-                this.errorMessage = '<ul style="margin-left: 1rem; list-style-type: disc;">' + 
-                    errors.map(err => `<li>${err}</li>`).join('') + 
-                    '</ul>';
-            }
+            this.errorMessage = this.formatErrorMessages(errors);
             return false;
         } else {
-            this.hasError = false;
-            this.errorMessage = '';
+            this.clearErrorState();
             return true;
         }
     }
