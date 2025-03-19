@@ -1,162 +1,165 @@
 <template>
     <!-- Preview button removed -->
 
-    <!-- Section 1: Basic Configuration Fields -->
-    <div class="slds-box slds-theme_shade slds-m-top_medium">
-        <h2 class="slds-text-heading_small slds-m-bottom_medium">Basic Configuration</h2>
-        
+    <!-- Section 1: Basic Configuration Fields (No box or label) -->
+    <div>
         <div class="slds-p-top_medium">
-            <lightning-input
-                type="text"
+            <lightning-combobox
+                name="label"
                 label="Label"
                 value={label}
+                placeholder="Select a value or enter a custom one"
+                options={resourceOptions}
                 onchange={handleLabelChange}
                 field-level-help="The label that appears above the email field">
-            </lightning-input>
+            </lightning-combobox>
         </div>
 
         <div class="slds-p-top_medium">
-            <lightning-input
-                type="text"
+            <lightning-combobox
+                name="placeholder"
                 label="Placeholder Text"
                 value={placeholder}
+                placeholder="Select a value or enter a custom one"
+                options={resourceOptions}
                 onchange={handlePlaceholderChange}
                 field-level-help="Text that appears in the field when it's empty">
-            </lightning-input>
+            </lightning-combobox>
         </div>
 
         <div class="slds-p-top_medium">
-            <lightning-textarea
+            <lightning-combobox
+                name="helpText"
                 label="Help Text"
                 value={helpText}
+                placeholder="Select a value or enter a custom one"
+                options={resourceOptions}
                 onchange={handleHelpTextChange}
                 field-level-help="Help text for the field">
-            </lightning-textarea>
+            </lightning-combobox>
         </div>
 
         <div class="slds-p-top_medium">
-            <lightning-input
-                type="checkbox"
+            <lightning-combobox
+                name="required"
                 label="Required"
-                checked={required}
+                value={required}
+                placeholder="Select a value"
+                options={booleanOptions}
                 onchange={handleRequiredChange}
                 field-level-help="If set to true, the running user must enter a value">
-            </lightning-input>
+            </lightning-combobox>
         </div>
 
         <div class="slds-p-top_medium">
-            <lightning-input
-                type="checkbox"
+            <lightning-combobox
+                name="disabled"
                 label="Disabled"
-                checked={disabled}
+                value={disabled}
+                placeholder="Select a value"
+                options={booleanOptions}
                 onchange={handleDisabledChange}
                 field-level-help="If set to true, the user can't modify the value">
-            </lightning-input>
+            </lightning-combobox>
         </div>
 
         <div class="slds-p-top_medium">
-            <lightning-input
-                type="number"
+            <lightning-combobox
+                name="maxEmails"
                 label="Maximum Emails"
                 value={maxEmails}
+                placeholder="Select a value or enter a custom one"
+                options={resourceOptions}
                 onchange={handleMaxEmailsChange}
-                field-level-help="Maximum number of emails allowed (0-150). Leave blank to use default limit of 150."
-                min="0"
-                max="150">
-            </lightning-input>
+                field-level-help="Maximum number of emails allowed (0-150). Leave blank to use default limit of 150.">
+            </lightning-combobox>
         </div>
 
         <div class="slds-p-top_medium">
-            <lightning-textarea
+            <lightning-combobox
+                name="allowedDomains"
                 label="Allowed Domains"
                 value={allowedDomains}
+                placeholder="Select a value or enter a custom one"
+                options={resourceOptions}
                 onchange={handleAllowedDomainsChange}
                 field-level-help="Comma-separated list of allowed email domains (e.g., 'example.com,*.edu'). Leave blank to allow all domains. Supports wildcards with * prefix.">
-            </lightning-textarea>
+            </lightning-combobox>
         </div>
 
         <div class="slds-p-top_medium">
-            <lightning-textarea
+            <lightning-combobox
+                name="blockedDomains"
                 label="Blocked Domains"
                 value={blockedDomains}
+                placeholder="Select a value or enter a custom one"
+                options={resourceOptions}
                 onchange={handleBlockedDomainsChange}
                 field-level-help="Comma-separated list of blocked email domains (e.g., 'spam.com,*.xyz'). Supports wildcards with * prefix.">
-            </lightning-textarea>
+            </lightning-combobox>
         </div>
     </div>
 
-    <!-- Section 2: Error Message Configuration -->
-    <div class="slds-box slds-theme_shade slds-m-top_medium">
-        <h2 class="slds-text-heading_small slds-m-bottom_medium">Error Message Configuration</h2>
-        
+    <!-- Section 2: Error Message Configuration (No box or label) -->
+    <div>
         <div class="slds-p-top_medium">
-            <lightning-input-rich-text
-                label="Invalid Email Error Message" 
+            <lightning-combobox
+                name="invalidEmailErrorMessage"
+                label="Invalid Email Error Message"
                 value={invalidEmailErrorMessage}
+                placeholder="Select a value or enter a custom one"
+                options={resourceOptions}
                 onchange={handleInvalidEmailErrorMessageChange}
-                formats={allowedFormats}
-                field-level-help="Custom error message when an invalid email format is entered. Supports rich text."
-                disable-lists
-                disable-indent
-                disable-align
-                disable-images>
-            </lightning-input-rich-text>
+                field-level-help="Custom error message when an invalid email format is entered. Supports rich text.">
+            </lightning-combobox>
         </div>
 
         <div class="slds-p-top_medium">
-            <lightning-input-rich-text
-                label="Maximum Emails Error Message" 
+            <lightning-combobox
+                name="maxEmailsErrorMessage"
+                label="Maximum Emails Error Message"
                 value={maxEmailsErrorMessage}
+                placeholder="Select a value or enter a custom one"
+                options={resourceOptions}
                 onchange={handleMaxEmailsErrorMessageChange}
-                formats={allowedFormats}
-                field-level-help="Custom error message when maximum emails limit is reached. Supports rich text."
-                disable-lists
-                disable-indent
-                disable-align
-                disable-images>
-            </lightning-input-rich-text>
+                field-level-help="Custom error message when maximum emails limit is reached. Supports rich text.">
+            </lightning-combobox>
         </div>
 
         <div class="slds-p-top_medium">
-            <lightning-input-rich-text
-                label="Duplicate Email Error Message" 
+            <lightning-combobox
+                name="duplicateEmailErrorMessage"
+                label="Duplicate Email Error Message"
                 value={duplicateEmailErrorMessage}
+                placeholder="Select a value or enter a custom one"
+                options={resourceOptions}
                 onchange={handleDuplicateEmailErrorMessageChange}
-                formats={allowedFormats}
-                field-level-help="Custom error message when attempting to add an email that already exists. Supports rich text."
-                disable-lists
-                disable-indent
-                disable-align
-                disable-images>
-            </lightning-input-rich-text>
+                field-level-help="Custom error message when attempting to add an email that already exists. Supports rich text.">
+            </lightning-combobox>
         </div>
 
         <div class="slds-p-top_medium">
-            <lightning-input-rich-text
-                label="Allowed Domain Error Message" 
+            <lightning-combobox
+                name="allowedDomainErrorMessage"
+                label="Allowed Domain Error Message"
                 value={allowedDomainErrorMessage}
+                placeholder="Select a value or enter a custom one"
+                options={resourceOptions}
                 onchange={handleAllowedDomainErrorMessageChange}
-                formats={allowedFormats}
-                field-level-help="Custom error message when an email domain is not in the allowed list. Supports rich text."
-                disable-lists
-                disable-indent
-                disable-align
-                disable-images>
-            </lightning-input-rich-text>
+                field-level-help="Custom error message when an email domain is not in the allowed list. Supports rich text.">
+            </lightning-combobox>
         </div>
 
         <div class="slds-p-top_medium">
-            <lightning-input-rich-text
-                label="Blocked Domain Error Message" 
+            <lightning-combobox
+                name="blockedDomainErrorMessage"
+                label="Blocked Domain Error Message"
                 value={blockedDomainErrorMessage}
+                placeholder="Select a value or enter a custom one"
+                options={resourceOptions}
                 onchange={handleBlockedDomainErrorMessageChange}
-                formats={allowedFormats}
-                field-level-help="Custom error message when an email domain is in the blocked list. Supports rich text."
-                disable-lists
-                disable-indent
-                disable-align
-                disable-images>
-            </lightning-input-rich-text>
+                field-level-help="Custom error message when an email domain is in the blocked list. Supports rich text.">
+            </lightning-combobox>
         </div>
     </div>
 </template>
