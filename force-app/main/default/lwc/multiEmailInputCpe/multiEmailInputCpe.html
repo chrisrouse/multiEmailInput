@@ -1,165 +1,228 @@
 <template>
-    <!-- Preview button removed -->
-
     <!-- Section 1: Basic Configuration Fields (No box or label) -->
     <div>
-        <div class="slds-p-top_medium">
-            <lightning-combobox
-                name="label"
+        <div>
+            <lightning-input
+                type="text"
                 label="Label"
                 value={label}
-                placeholder="Select a value or enter a custom one"
-                options={resourceOptions}
                 onchange={handleLabelChange}
                 field-level-help="The label that appears above the email field">
-            </lightning-combobox>
+            </lightning-input>
         </div>
 
-        <div class="slds-p-top_medium">
-            <lightning-combobox
-                name="placeholder"
+        <div>
+            <lightning-input
+                type="text"
                 label="Placeholder Text"
                 value={placeholder}
-                placeholder="Select a value or enter a custom one"
-                options={resourceOptions}
                 onchange={handlePlaceholderChange}
                 field-level-help="Text that appears in the field when it's empty">
-            </lightning-combobox>
+            </lightning-input>
         </div>
 
-        <div class="slds-p-top_medium">
-            <lightning-combobox
-                name="helpText"
+        <div>
+            <lightning-textarea
                 label="Help Text"
                 value={helpText}
-                placeholder="Select a value or enter a custom one"
-                options={resourceOptions}
                 onchange={handleHelpTextChange}
                 field-level-help="Help text for the field">
-            </lightning-combobox>
+            </lightning-textarea>
         </div>
 
-        <div class="slds-p-top_medium">
-            <lightning-combobox
-                name="required"
-                label="Required"
-                value={required}
-                placeholder="Select a value"
-                options={booleanOptions}
-                onchange={handleRequiredChange}
-                field-level-help="If set to true, the running user must enter a value">
-            </lightning-combobox>
+        <!-- Required field with resource picker -->
+        <div class="slds-form-element">
+            <label class="slds-form-element__label" for="required-field">
+                Required
+                <lightning-helptext content="If set to true, the running user must enter a value"></lightning-helptext>
+            </label>
+            <div class="slds-form-element__control">
+                <div class="slds-combobox_container">
+                    <div class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click" 
+                         aria-expanded={showRequiredDropdown} 
+                         aria-haspopup="listbox" 
+                         role="combobox">
+                        <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right" role="none">
+                            <input type="text" 
+                                   id="required-field" 
+                                   class="slds-input slds-combobox__input" 
+                                   aria-autocomplete="list" 
+                                   aria-controls="listbox-required" 
+                                   autocomplete="off" 
+                                   role="textbox" 
+                                   placeholder="Select a value or reference" 
+                                   value={requiredDisplay}
+                                   data-field="required"
+                                   onclick={handleResourcePickerClick}
+                                   onkeyup={handleResourceInputChange}
+                                   onblur={handleResourcePickerBlur}
+                            />
+                            <span class="slds-icon_container slds-input__icon slds-input__icon_right">
+                                <lightning-icon icon-name="utility:down" size="x-small"></lightning-icon>
+                            </span>
+                        </div>
+                        <div id="listbox-required" class="slds-dropdown slds-dropdown_length-with-icon-7 slds-dropdown_fluid" role="listbox" style={requiredDropdownStyle}>
+                            <ul class="slds-listbox slds-listbox_vertical" role="presentation">
+                                <!-- Static options for true/false -->
+                                <li role="presentation" class="slds-listbox__item" onclick={handleResourceSelect} data-value="true" data-field="required">
+                                    <div class="slds-media slds-listbox__option slds-listbox__option_plain" role="option">
+                                        <span class="slds-media__body">
+                                            <span class="slds-truncate">true</span>
+                                        </span>
+                                    </div>
+                                </li>
+                                <li role="presentation" class="slds-listbox__item" onclick={handleResourceSelect} data-value="false" data-field="required">
+                                    <div class="slds-media slds-listbox__option slds-listbox__option_plain" role="option">
+                                        <span class="slds-media__body">
+                                            <span class="slds-truncate">false</span>
+                                        </span>
+                                    </div>
+                                </li>
+                                
+                                <!-- Flow variables section -->
+                                <li role="presentation" class="slds-listbox__item">
+                                    <div class="slds-media slds-listbox__option slds-listbox__option_plain slds-has-divider_top-space" role="presentation">
+                                        <span class="slds-media__body">
+                                            <span class="slds-truncate slds-text-title_caps">Flow Resources (Boolean)</span>
+                                        </span>
+                                    </div>
+                                </li>
+                                
+                                <!-- Dynamic list of flow variables -->
+                                <template for:each={filteredBooleanResources} for:item="resource">
+                                    <li key={resource.value} role="presentation" class="slds-listbox__item" 
+                                        onclick={handleResourceSelect} data-value={resource.value} data-field="required">
+                                        <div class="slds-media slds-listbox__option slds-listbox__option_entity" role="option">
+                                            <span class="slds-media__figure">
+                                                <lightning-icon icon-name={resource.icon} size="small"></lightning-icon>
+                                            </span>
+                                            <span class="slds-media__body">
+                                                <span class="slds-listbox__option-text slds-listbox__option-text_entity">{resource.label}</span>
+                                                <span class="slds-listbox__option-meta slds-listbox__option-meta_entity">{resource.type}</span>
+                                            </span>
+                                        </div>
+                                    </li>
+                                </template>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="slds-p-top_medium">
-            <lightning-combobox
-                name="disabled"
+        <div>
+            <lightning-input
+                type="checkbox"
                 label="Disabled"
-                value={disabled}
-                placeholder="Select a value"
-                options={booleanOptions}
+                checked={disabled}
                 onchange={handleDisabledChange}
                 field-level-help="If set to true, the user can't modify the value">
-            </lightning-combobox>
+            </lightning-input>
         </div>
 
-        <div class="slds-p-top_medium">
-            <lightning-combobox
-                name="maxEmails"
+        <div>
+            <lightning-input
+                type="number"
                 label="Maximum Emails"
                 value={maxEmails}
-                placeholder="Select a value or enter a custom one"
-                options={resourceOptions}
                 onchange={handleMaxEmailsChange}
-                field-level-help="Maximum number of emails allowed (0-150). Leave blank to use default limit of 150.">
-            </lightning-combobox>
+                field-level-help="Maximum number of emails allowed (0-150). Leave blank to use default limit of 150."
+                min="0"
+                max="150">
+            </lightning-input>
         </div>
 
-        <div class="slds-p-top_medium">
-            <lightning-combobox
-                name="allowedDomains"
+        <div>
+            <lightning-textarea
                 label="Allowed Domains"
                 value={allowedDomains}
-                placeholder="Select a value or enter a custom one"
-                options={resourceOptions}
                 onchange={handleAllowedDomainsChange}
                 field-level-help="Comma-separated list of allowed email domains (e.g., 'example.com,*.edu'). Leave blank to allow all domains. Supports wildcards with * prefix.">
-            </lightning-combobox>
+            </lightning-textarea>
         </div>
 
-        <div class="slds-p-top_medium">
-            <lightning-combobox
-                name="blockedDomains"
+        <div>
+            <lightning-textarea
                 label="Blocked Domains"
                 value={blockedDomains}
-                placeholder="Select a value or enter a custom one"
-                options={resourceOptions}
                 onchange={handleBlockedDomainsChange}
                 field-level-help="Comma-separated list of blocked email domains (e.g., 'spam.com,*.xyz'). Supports wildcards with * prefix.">
-            </lightning-combobox>
+            </lightning-textarea>
         </div>
     </div>
 
-    <!-- Section 2: Error Message Configuration (No box or label) -->
-    <div>
-        <div class="slds-p-top_medium">
-            <lightning-combobox
-                name="invalidEmailErrorMessage"
-                label="Invalid Email Error Message"
-                value={invalidEmailErrorMessage}
-                placeholder="Select a value or enter a custom one"
-                options={resourceOptions}
-                onchange={handleInvalidEmailErrorMessageChange}
-                field-level-help="Custom error message when an invalid email format is entered. Supports rich text.">
-            </lightning-combobox>
-        </div>
+    <!-- Section 2: Error Message Configuration as an accordion -->
+    <lightning-accordion allow-multiple-sections-open class="error-accordion" active-section-name={activeSections} onsectiontoggle={handleSectionToggle}>
+        <lightning-accordion-section name="errorMessages" label="Error Messages">
+            <div>
+                <lightning-input-rich-text
+                    label="Invalid Email Error Message" 
+                    value={invalidEmailErrorMessage}
+                    onchange={handleInvalidEmailErrorMessageChange}
+                    formats={allowedFormats}
+                    field-level-help="Custom error message when an invalid email format is entered. Supports rich text."
+                    disable-lists
+                    disable-indent
+                    disable-align
+                    disable-images>
+                </lightning-input-rich-text>
+            </div>
 
-        <div class="slds-p-top_medium">
-            <lightning-combobox
-                name="maxEmailsErrorMessage"
-                label="Maximum Emails Error Message"
-                value={maxEmailsErrorMessage}
-                placeholder="Select a value or enter a custom one"
-                options={resourceOptions}
-                onchange={handleMaxEmailsErrorMessageChange}
-                field-level-help="Custom error message when maximum emails limit is reached. Supports rich text.">
-            </lightning-combobox>
-        </div>
+            <div>
+                <lightning-input-rich-text
+                    label="Maximum Emails Error Message" 
+                    value={maxEmailsErrorMessage}
+                    onchange={handleMaxEmailsErrorMessageChange}
+                    formats={allowedFormats}
+                    field-level-help="Custom error message when maximum emails limit is reached. Supports rich text."
+                    disable-lists
+                    disable-indent
+                    disable-align
+                    disable-images>
+                </lightning-input-rich-text>
+            </div>
 
-        <div class="slds-p-top_medium">
-            <lightning-combobox
-                name="duplicateEmailErrorMessage"
-                label="Duplicate Email Error Message"
-                value={duplicateEmailErrorMessage}
-                placeholder="Select a value or enter a custom one"
-                options={resourceOptions}
-                onchange={handleDuplicateEmailErrorMessageChange}
-                field-level-help="Custom error message when attempting to add an email that already exists. Supports rich text.">
-            </lightning-combobox>
-        </div>
+            <div>
+                <lightning-input-rich-text
+                    label="Duplicate Email Error Message" 
+                    value={duplicateEmailErrorMessage}
+                    onchange={handleDuplicateEmailErrorMessageChange}
+                    formats={allowedFormats}
+                    field-level-help="Custom error message when attempting to add an email that already exists. Supports rich text."
+                    disable-lists
+                    disable-indent
+                    disable-align
+                    disable-images>
+                </lightning-input-rich-text>
+            </div>
 
-        <div class="slds-p-top_medium">
-            <lightning-combobox
-                name="allowedDomainErrorMessage"
-                label="Allowed Domain Error Message"
-                value={allowedDomainErrorMessage}
-                placeholder="Select a value or enter a custom one"
-                options={resourceOptions}
-                onchange={handleAllowedDomainErrorMessageChange}
-                field-level-help="Custom error message when an email domain is not in the allowed list. Supports rich text.">
-            </lightning-combobox>
-        </div>
+            <div>
+                <lightning-input-rich-text
+                    label="Allowed Domain Error Message" 
+                    value={allowedDomainErrorMessage}
+                    onchange={handleAllowedDomainErrorMessageChange}
+                    formats={allowedFormats}
+                    field-level-help="Custom error message when an email domain is not in the allowed list. Supports rich text."
+                    disable-lists
+                    disable-indent
+                    disable-align
+                    disable-images>
+                </lightning-input-rich-text>
+            </div>
 
-        <div class="slds-p-top_medium">
-            <lightning-combobox
-                name="blockedDomainErrorMessage"
-                label="Blocked Domain Error Message"
-                value={blockedDomainErrorMessage}
-                placeholder="Select a value or enter a custom one"
-                options={resourceOptions}
-                onchange={handleBlockedDomainErrorMessageChange}
-                field-level-help="Custom error message when an email domain is in the blocked list. Supports rich text.">
-            </lightning-combobox>
-        </div>
-    </div>
+            <div>
+                <lightning-input-rich-text
+                    label="Blocked Domain Error Message" 
+                    value={blockedDomainErrorMessage}
+                    onchange={handleBlockedDomainErrorMessageChange}
+                    formats={allowedFormats}
+                    field-level-help="Custom error message when an email domain is in the blocked list. Supports rich text."
+                    disable-lists
+                    disable-indent
+                    disable-align
+                    disable-images>
+                </lightning-input-rich-text>
+            </div>
+        </lightning-accordion-section>
+    </lightning-accordion>
 </template>

@@ -1,1 +1,7 @@
-/* */
+/* Ensure accordion styling matches native Flow accordion */
+.error-accordion .slds-accordion__summary-heading {
+    font-weight: 700;
+    font-size: 0.875rem;
+    line-height: 1.25;
+    color: rgb(62, 62, 60);
+}

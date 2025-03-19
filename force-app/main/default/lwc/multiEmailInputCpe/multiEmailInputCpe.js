@@ -2,7 +2,14 @@ import { LightningElement, api, track } from 'lwc';
 
 export default class MultiEmailInputCpe extends LightningElement {
     _inputVariables = [];
+    @track _flowContext;
     @track _flowVariables = [];
+    @track activeSections = ['errorMessages']; // Initialize with the section open
+    
+    // Resource picker state
+    @track showRequiredDropdown = false;
+    @track resourceFilter = '';
+    @track activeField = null;
 
     @api
     get inputVariables() {
@@ -14,40 +21,21 @@ export default class MultiEmailInputCpe extends LightningElement {
     }
 
     @api
+    get flowContext() {
+        return this._flowContext;
+    }
+
+    set flowContext(value) {
+        this._flowContext = value;
+    }
+
+    @api
     get flowVariables() {
         return this._flowVariables;
     }
 
     set flowVariables(variables) {
         this._flowVariables = variables || [];
-        this.initResourceOptions();
-    }
-
-    // Options for dropdowns
-    _resourceOptions = [];
-    _booleanOptions = [
-        { label: 'True', value: 'true' },
-        { label: 'False', value: 'false' }
-    ];
-
-    connectedCallback() {
-        this.initResourceOptions();
-    }
-
-    initResourceOptions() {
-        if (this._flowVariables && this._flowVariables.length) {
-            const options = this._flowVariables
-                .filter(variable => variable.name)
-                .map(variable => ({
-                    label: variable.name,
-                    value: '{!' + variable.name + '}'
-                }));
-            
-            // Add empty option
-            options.unshift({ label: '-- None --', value: '' });
-            
-            this._resourceOptions = options;
-        }
     }
 
     // Property getters
@@ -68,12 +56,12 @@ export default class MultiEmailInputCpe extends LightningElement {
 
     get required() {
         const param = this.inputVariables.find(({ name }) => name === "required");
-        return param && param.value ? 'true' : 'false';
+        return param && param.value;
     }
 
     get disabled() {
         const param = this.inputVariables.find(({ name }) => name === "disabled");
-        return param && param.value ? 'true' : 'false';
+        return param && param.value;
     }
 
     get maxEmails() {
@@ -116,15 +104,235 @@ export default class MultiEmailInputCpe extends LightningElement {
         return param && param.value || '';
     }
 
-    get resourceOptions() {
-        return this._resourceOptions;
+    get allowedFormats() {
+        return [
+            'font',
+            'size',
+            'bold',
+            'italic',
+            'underline',
+            'strike',
+            'clean'
+        ];
     }
     
-    get booleanOptions() {
-        return this._booleanOptions;
+    // Resource picker getters
+    get requiredDisplay() {
+        const param = this.inputVariables.find(({ name }) => name === "required");
+        const value = param && param.value !== undefined ? param.value : false;
+        
+        // If it's a reference, return the string value
+        if (typeof value === 'string' && value.startsWith('{!')) {
+            return value;
+        }
+        
+        // Otherwise return the boolean value as a string
+        return String(value);
+    }
+    
+    get requiredDropdownStyle() {
+        return this.showRequiredDropdown ? 'display: block;' : 'display: none;';
+    }
+    
+    // Get available Boolean resources from the flow
+    get filteredBooleanResources() {
+        if (!this._flowVariables) return [];
+        
+        const searchTerm = this.resourceFilter.toLowerCase();
+        
+        // Filter flow variables that are Boolean type or formulas
+        return this._flowVariables
+            .filter(variable => {
+                // Include Boolean variables and formulas
+                const isBoolean = variable.dataType === 'Boolean';
+                const isFormula = variable.dataType === 'Formula';
+                const matchesSearch = !searchTerm || 
+                    variable.name.toLowerCase().includes(searchTerm);
+                
+                return (isBoolean || isFormula) && matchesSearch;
+            })
+            .map(variable => {
+                // Transform to the format needed for display
+                let icon = 'utility:variable';
+                if (variable.dataType === 'Boolean') {
+                    icon = 'utility:check';
+                } else if (variable.dataType === 'Formula') {
+                    icon = 'utility:formula';
+                }
+                
+                return {
+                    label: variable.name,
+                    value: '{!' + variable.name + '}', // Flow syntax for variable reference
+                    type: variable.dataType,
+                    icon: icon
+                };
+            });
+    }
+    
+    // Resource picker event handlers
+    handleResourcePickerClick(event) {
+        const field = event.target.dataset.field;
+        this.activeField = field;
+        this.resourceFilter = '';
+        
+        if (field === 'required') {
+            this.showRequiredDropdown = true;
+        }
+        
+        // Add event listener to close dropdown when clicking outside
+        setTimeout(() => {
+            window.addEventListener('click', this.handleClickOutside);
+        }, 1);
+    }
+    
+    handleResourceInputChange(event) {
+        const field = event.target.dataset.field;
+        if (field === this.activeField) {
+            this.resourceFilter = event.target.value;
+            
+            // If it's an exact value (true/false) or a reference ({!...}), update immediately
+            const value = event.target.value;
+            if (value === 'true' || value === 'false' || (value.startsWith('{!') && value.endsWith('}'))) {
+                this.updateFieldValue(field, value);
+            }
+        }
+    }
+    
+    handleResourceSelect(event) {
+        event.stopPropagation();
+        
+        const value = event.currentTarget.dataset.value;
+        const field = event.currentTarget.dataset.field;
+        
+        this.updateFieldValue(field, value);
+        this.closeAllDropdowns();
+    }
+    
+    updateFieldValue(fieldName, value) {
+        let dataType = 'String';
+        
+        // Determine the data type
+        if (fieldName === 'required' || fieldName === 'disabled') {
+            dataType = 'Boolean';
+        } else if (fieldName === 'maxEmails') {
+            dataType = 'Integer';
+        }
+        
+        // Convert the value if it's not a reference
+        if (dataType === 'Boolean' && (value === 'true' || value === 'false') && !value.includes('{!')) {
+            value = value === 'true';
+        } 
+        else if (dataType === 'Integer' && !value.includes('{!') && !isNaN(parseInt(value, 10))) {
+            value = parseInt(value, 10);
+        }
+        
+        this.dispatchFlowValueChangeEvent(fieldName, value, dataType);
+    }
+    
+    handleResourcePickerBlur() {
+        // Use setTimeout to allow click events to process first
+        setTimeout(() => {
+            this.closeAllDropdowns();
+        }, 300);
+    }
+    
+    closeAllDropdowns() {
+        this.showRequiredDropdown = false;
+        window.removeEventListener('click', this.handleClickOutside);
+    }
+    
+    // Attached as property to ensure proper 'this' binding
+    handleClickOutside = (event) => {
+        const dropdowns = this.template.querySelectorAll('.slds-dropdown');
+        let clickedInside = false;
+        
+        dropdowns.forEach(dropdown => {
+            if (dropdown.contains(event.target)) {
+                clickedInside = true;
+            }
+        });
+        
+        // Also check if clicked on the input field
+        const inputs = this.template.querySelectorAll('.slds-combobox__input');
+        inputs.forEach(input => {
+            if (input.contains(event.target)) {
+                clickedInside = true;
+            }
+        });
+        
+        if (!clickedInside) {
+            this.closeAllDropdowns();
+        }
     }
 
-    // Event dispatching methods
+    // Handlers for other fields
+    handleLabelChange(event) {
+        const value = event.target.value;
+        this.dispatchFlowValueChangeEvent('label', value);
+    }
+
+    handlePlaceholderChange(event) {
+        const value = event.target.value;
+        this.dispatchFlowValueChangeEvent('placeholder', value);
+    }
+
+    handleHelpTextChange(event) {
+        const value = event.target.value;
+        this.dispatchFlowValueChangeEvent('helpText', value);
+    }
+
+    handleDisabledChange(event) {
+        const value = event.target.checked;
+        this.dispatchFlowValueChangeEvent('disabled', value, 'Boolean');
+    }
+
+    handleMaxEmailsChange(event) {
+        let value = event.target.value;
+        
+        // If it's a valid number, convert to integer
+        if (value && !isNaN(parseInt(value, 10))) {
+            value = parseInt(value, 10);
+        }
+        
+        this.dispatchFlowValueChangeEvent('maxEmails', value, 'Integer');
+    }
+
+    handleAllowedDomainsChange(event) {
+        const value = event.target.value;
+        this.dispatchFlowValueChangeEvent('allowedDomains', value);
+    }
+
+    handleBlockedDomainsChange(event) {
+        const value = event.target.value;
+        this.dispatchFlowValueChangeEvent('blockedDomains', value);
+    }
+
+    handleInvalidEmailErrorMessageChange(event) {
+        const value = event.detail.value;
+        this.dispatchFlowValueChangeEvent('invalidEmailErrorMessage', value);
+    }
+
+    handleMaxEmailsErrorMessageChange(event) {
+        const value = event.detail.value;
+        this.dispatchFlowValueChangeEvent('maxEmailsErrorMessage', value);
+    }
+
+    handleDuplicateEmailErrorMessageChange(event) {
+        const value = event.detail.value;
+        this.dispatchFlowValueChangeEvent('duplicateEmailErrorMessage', value);
+    }
+
+    handleAllowedDomainErrorMessageChange(event) {
+        const value = event.detail.value;
+        this.dispatchFlowValueChangeEvent('allowedDomainErrorMessage', value);
+    }
+
+    handleBlockedDomainErrorMessageChange(event) {
+        const value = event.detail.value;
+        this.dispatchFlowValueChangeEvent('blockedDomainErrorMessage', value);
+    }
+
+    // Event dispatching method
     dispatchFlowValueChangeEvent(name, newValue, dataType = 'String') {
         const valueChangeEvent = new CustomEvent(
             "configuration_editor_input_value_changed",
@@ -142,76 +350,8 @@ export default class MultiEmailInputCpe extends LightningElement {
         this.dispatchEvent(valueChangeEvent);
     }
 
-    // Helper method to handle combobox changes
-    processValueChange(event, propertyName, dataType = 'String') {
-        let value = event.detail.value;
-        
-        // Handle boolean values
-        if (dataType === 'Boolean') {
-            value = value === 'true';
-        }
-        
-        // Handle integer values
-        if (dataType === 'Integer' && value) {
-            // If it's a flow variable reference (starts with {!), keep as is
-            if (!value.startsWith('{!')) {
-                const parsedValue = parseInt(value, 10);
-                value = isNaN(parsedValue) ? null : parsedValue;
-            }
-        }
-        
-        this.dispatchFlowValueChangeEvent(propertyName, value, dataType);
+    // Handle accordion section toggle
+    handleSectionToggle(event) {
+        this.activeSections = event.detail.openSections;
     }
-
-    // Event handlers for each property
-    handleLabelChange(event) {
-        this.processValueChange(event, 'label');
-    }
-
-    handlePlaceholderChange(event) {
-        this.processValueChange(event, 'placeholder');
-    }
-
-    handleHelpTextChange(event) {
-        this.processValueChange(event, 'helpText');
-    }
-
-    handleRequiredChange(event) {
-        this.processValueChange(event, 'required', 'Boolean');
-    }
-
-    handleDisabledChange(event) {
-        this.processValueChange(event, 'disabled', 'Boolean');
-    }
-
-    handleMaxEmailsChange(event) {
-        this.processValueChange(event, 'maxEmails', 'Integer');
-    }
-
-    handleAllowedDomainsChange(event) {
-        this.processValueChange(event, 'allowedDomains');
-    }
-
-    handleBlockedDomainsChange(event) {
-        this.processValueChange(event, 'blockedDomains');
-    }
-
-    handleInvalidEmailErrorMessageChange(event) {
-        this.processValueChange(event, 'invalidEmailErrorMessage');
-    }
-
-    handleMaxEmailsErrorMessageChange(event) {
-        this.processValueChange(event, 'maxEmailsErrorMessage');
-    }
-
-    handleDuplicateEmailErrorMessageChange(event) {
-        this.processValueChange(event, 'duplicateEmailErrorMessage');
-    }
-
-    handleAllowedDomainErrorMessageChange(event) {
-        this.processValueChange(event, 'allowedDomainErrorMessage');
-    }
-
-    handleBlockedDomainErrorMessageChange(event) {
-        this.processValueChange(event, 'blockedDomainErrorMessage');
-    }}
+}
