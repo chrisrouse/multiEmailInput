@@ -1,10 +1,9 @@
 # Multi Email Input LWC Changelog
 
 ## v 1.0
-- Initial release! Woo hoo!
+- Initial release! 
 
 ## v 1.1
-- Add
 
 ### New Features
 
@@ -26,11 +25,11 @@
 #### Customizable Error Messages
 - **Rich Text Support**: All error messages now support rich text formatting
 - **New Error Message Properties**:
-  - `invalidEmailErrorMessage`: Custom message for invalid email format
-  - `maxEmailsErrorMessage`: Custom message when maximum email limit is reached
-  - `duplicateEmailErrorMessage`: Custom message when adding duplicate email
-  - `allowedDomainErrorMessage`: Custom message when domain is not in allowed list
-  - `blockedDomainErrorMessage`: Custom message when domain is in blocked list
+  - `Invalid Email Error Message`: Custom message for invalid email format
+  - `Maximum Emails Error Message`: Custom message when maximum email limit is reached
+  - `Duplicate Emails Error Message`: Custom message when adding duplicate email
+  - `Allowed Domains Error Message`: Custom message when domain is not in allowed list
+  - `Blocked Domains Error Message`: Custom message when domain is in blocked list
 
 ### Improvements
 - **Error Message Consistency**: All default error messages now end with a period

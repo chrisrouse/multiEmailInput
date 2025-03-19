@@ -1,7 +1,7 @@
 import { LightningElement, api, track } from 'lwc';
 import { FlowAttributeChangeEvent } from 'lightning/flowSupport';
 
-export default class MultiEmailInput2 extends LightningElement {
+export default class MultiEmailInput extends LightningElement {
     @api label = 'Email';
     @api placeholder = 'Enter an email address';
     @api required = false;
@@ -10,8 +10,8 @@ export default class MultiEmailInput2 extends LightningElement {
     @api disabled = false;
     @api allowedDomains = '';
     @api blockedDomains = '';
-    @api allowedDomainErrorMessage = '';
-    @api blockedDomainErrorMessage = '';
+    @api allowedDomainsErrorMessage = '';
+    @api blockedDomainsErrorMessage = '';
     @api invalidEmailErrorMessage = '';
     @api maxEmailsErrorMessage = '';
     @api duplicateEmailErrorMessage = '';

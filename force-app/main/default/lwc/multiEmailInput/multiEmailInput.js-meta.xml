@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.1" encoding="UTF-8"?>
 <LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
     <apiVersion>63.0</apiVersion>
     <isExposed>true</isExposed>
@@ -27,8 +27,8 @@
             <property name="invalidEmailErrorMessage" type="String" label="Invalid Email Error Message" description="Custom error message when an invalid email format is entered. Supports rich text." />
             <property name="maxEmailsErrorMessage" type="String" label="Maximum Emails Error Message" description="Custom error message when maximum emails limit is reached. Supports rich text." />
             <property name="duplicateEmailErrorMessage" type="String" label="Duplicate Email Error Message" description="Custom error message when attempting to add an email that already exists. Supports rich text." />
-            <property name="allowedDomainErrorMessage" type="String" label="Allowed Domain Error Message" description="Custom error message when an email domain is not in the allowed list. Supports rich text." />
-            <property name="blockedDomainErrorMessage" type="String" label="Blocked Domain Error Message" description="Custom error message when an email domain is in the blocked list. Supports rich text." />
+            <property name="allowedDomainsErrorMessage" type="String" label="Allowed Domains Error Message" description="Custom error message when an email domain is not in the allowed list. Supports rich text." />
+            <property name="blockedDomainsErrorMessage" type="String" label="Blocked Domains Error Message" description="Custom error message when an email domain is in the blocked list. Supports rich text." />
             
             <!-- Input property to set initial values -->
             <property name="value" type="String[]" label="Value" description="Select a resource to pre-populate your collection. If you enable domain restrictions, all emails in this collection must be valid." role="inputOnly" />
