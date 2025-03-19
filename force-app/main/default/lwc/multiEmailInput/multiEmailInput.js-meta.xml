@@ -8,7 +8,7 @@
         <target>lightning__FlowScreen</target>
     </targets>
     <targetConfigs>
-        <targetConfig targets="lightning__FlowScreen">
+        <targetConfig targets="lightning__FlowScreen" configurationEditor="c-multi-email-input-cpe">
             <!-- Basic Field Configuration -->
             <property name="label" type="String" label="Label" default="Email" description="The label that appears above the email field" />
             <property name="placeholder" type="String" label="Placeholder Text" default="Enter an email address" description="Text that appears in the field when it's empty. Use placeholder text to give users a hint about what to enter in the field." />

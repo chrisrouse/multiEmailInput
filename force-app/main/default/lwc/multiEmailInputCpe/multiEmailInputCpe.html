@@ -1,0 +1,162 @@
+<template>
+    <!-- Preview button removed -->
+
+    <!-- Section 1: Basic Configuration Fields -->
+    <div class="slds-box slds-theme_shade slds-m-top_medium">
+        <h2 class="slds-text-heading_small slds-m-bottom_medium">Basic Configuration</h2>
+        
+        <div class="slds-p-top_medium">
+            <lightning-input
+                type="text"
+                label="Label"
+                value={label}
+                onchange={handleLabelChange}
+                field-level-help="The label that appears above the email field">
+            </lightning-input>
+        </div>
+
+        <div class="slds-p-top_medium">
+            <lightning-input
+                type="text"
+                label="Placeholder Text"
+                value={placeholder}
+                onchange={handlePlaceholderChange}
+                field-level-help="Text that appears in the field when it's empty">
+            </lightning-input>
+        </div>
+
+        <div class="slds-p-top_medium">
+            <lightning-textarea
+                label="Help Text"
+                value={helpText}
+                onchange={handleHelpTextChange}
+                field-level-help="Help text for the field">
+            </lightning-textarea>
+        </div>
+
+        <div class="slds-p-top_medium">
+            <lightning-input
+                type="checkbox"
+                label="Required"
+                checked={required}
+                onchange={handleRequiredChange}
+                field-level-help="If set to true, the running user must enter a value">
+            </lightning-input>
+        </div>
+
+        <div class="slds-p-top_medium">
+            <lightning-input
+                type="checkbox"
+                label="Disabled"
+                checked={disabled}
+                onchange={handleDisabledChange}
+                field-level-help="If set to true, the user can't modify the value">
+            </lightning-input>
+        </div>
+
+        <div class="slds-p-top_medium">
+            <lightning-input
+                type="number"
+                label="Maximum Emails"
+                value={maxEmails}
+                onchange={handleMaxEmailsChange}
+                field-level-help="Maximum number of emails allowed (0-150). Leave blank to use default limit of 150."
+                min="0"
+                max="150">
+            </lightning-input>
+        </div>
+
+        <div class="slds-p-top_medium">
+            <lightning-textarea
+                label="Allowed Domains"
+                value={allowedDomains}
+                onchange={handleAllowedDomainsChange}
+                field-level-help="Comma-separated list of allowed email domains (e.g., 'example.com,*.edu'). Leave blank to allow all domains. Supports wildcards with * prefix.">
+            </lightning-textarea>
+        </div>
+
+        <div class="slds-p-top_medium">
+            <lightning-textarea
+                label="Blocked Domains"
+                value={blockedDomains}
+                onchange={handleBlockedDomainsChange}
+                field-level-help="Comma-separated list of blocked email domains (e.g., 'spam.com,*.xyz'). Supports wildcards with * prefix.">
+            </lightning-textarea>
+        </div>
+    </div>
+
+    <!-- Section 2: Error Message Configuration -->
+    <div class="slds-box slds-theme_shade slds-m-top_medium">
+        <h2 class="slds-text-heading_small slds-m-bottom_medium">Error Message Configuration</h2>
+        
+        <div class="slds-p-top_medium">
+            <lightning-input-rich-text
+                label="Invalid Email Error Message" 
+                value={invalidEmailErrorMessage}
+                onchange={handleInvalidEmailErrorMessageChange}
+                formats={allowedFormats}
+                field-level-help="Custom error message when an invalid email format is entered. Supports rich text."
+                disable-lists
+                disable-indent
+                disable-align
+                disable-images>
+            </lightning-input-rich-text>
+        </div>
+
+        <div class="slds-p-top_medium">
+            <lightning-input-rich-text
+                label="Maximum Emails Error Message" 
+                value={maxEmailsErrorMessage}
+                onchange={handleMaxEmailsErrorMessageChange}
+                formats={allowedFormats}
+                field-level-help="Custom error message when maximum emails limit is reached. Supports rich text."
+                disable-lists
+                disable-indent
+                disable-align
+                disable-images>
+            </lightning-input-rich-text>
+        </div>
+
+        <div class="slds-p-top_medium">
+            <lightning-input-rich-text
+                label="Duplicate Email Error Message" 
+                value={duplicateEmailErrorMessage}
+                onchange={handleDuplicateEmailErrorMessageChange}
+                formats={allowedFormats}
+                field-level-help="Custom error message when attempting to add an email that already exists. Supports rich text."
+                disable-lists
+                disable-indent
+                disable-align
+                disable-images>
+            </lightning-input-rich-text>
+        </div>
+
+        <div class="slds-p-top_medium">
+            <lightning-input-rich-text
+                label="Allowed Domain Error Message" 
+                value={allowedDomainErrorMessage}
+                onchange={handleAllowedDomainErrorMessageChange}
+                formats={allowedFormats}
+                field-level-help="Custom error message when an email domain is not in the allowed list. Supports rich text."
+                disable-lists
+                disable-indent
+                disable-align
+                disable-images>
+            </lightning-input-rich-text>
+        </div>
+
+        <div class="slds-p-top_medium">
+            <lightning-input-rich-text
+                label="Blocked Domain Error Message" 
+                value={blockedDomainErrorMessage}
+                onchange={handleBlockedDomainErrorMessageChange}
+                formats={allowedFormats}
+                field-level-help="Custom error message when an email domain is in the blocked list. Supports rich text."
+                disable-lists
+                disable-indent
+                disable-align
+                disable-images>
+            </lightning-input-rich-text>
+        </div>
+    </div>
+</template>

@@ -1,7 +1,7 @@
 import { LightningElement, api, track } from 'lwc';
 import { FlowAttributeChangeEvent } from 'lightning/flowSupport';
 
-export default class MultiEmailInput2 extends LightningElement {
+export default class MultiEmailInput extends LightningElement {
     @api label = 'Email';
     @api placeholder = 'Enter an email address';
     @api required = false;
