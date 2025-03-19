@@ -5,8 +5,7 @@
       "default": true
     }
   ],
-  "name": "multiEmailInput",
-  "namespace": "bychris",
+  "namespace": "",
   "sfdcLoginUrl": "https://login.salesforce.com",
   "sourceApiVersion": "63.0"
 }

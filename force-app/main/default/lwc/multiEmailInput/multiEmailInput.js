@@ -9,7 +9,12 @@ export default class MultiEmailInput2 extends LightningElement {
     @api maxEmails;
     @api disabled = false;
     @api allowedDomains = '';
-    @api validationErrorMessage = '';
+    @api blockedDomains = '';
+    @api allowedDomainErrorMessage = '';
+    @api blockedDomainErrorMessage = '';
+    @api invalidEmailErrorMessage = '';
+    @api maxEmailsErrorMessage = '';
+    @api duplicateEmailErrorMessage = '';
     
     // Track internal state
     @track selectedEmails = [];
@@ -18,6 +23,9 @@ export default class MultiEmailInput2 extends LightningElement {
     @track hasError = false;
     @track showHelpPopover = false;
     @track popoverPosition = 'bottom'; // Tracks if popover should appear above or below
+    
+    // Constants
+    ABSOLUTE_MAX_EMAILS = 150;
     
     // Private properties
     _value = [];
@@ -37,19 +45,23 @@ export default class MultiEmailInput2 extends LightningElement {
             const errors = [];
             
             // Check max emails constraint
-            if (this.maxEmails && value.length > this.maxEmails) {
-                errors.push(`You can only add up to ${this.maxEmails} email addresses`);
+            const effectiveMaxEmails = this.getEffectiveMaxEmails();
+            if (value.length > effectiveMaxEmails) {
+                errors.push(`You can only add up to ${effectiveMaxEmails} email addresses`);
             }
             
             // Check domain validation if needed
-            if (this.allowedDomains && this.allowedDomains.trim() !== '') {
+            const validationNeeded = (this.allowedDomains && this.allowedDomains.trim() !== '') || 
+                                     (this.blockedDomains && this.blockedDomains.trim() !== '');
+            
+            if (validationNeeded) {
                 // Find any emails with invalid domains
-                const invalidEmails = value.filter(email => !this.isValidDomain(email));
+                const invalidEmails = value.filter(email => !this.isDomainValid(email));
                 if (invalidEmails.length > 0) {
                     if (this.validationErrorMessage && this.validationErrorMessage.trim() !== '') {
                         errors.push(this.validationErrorMessage);
                     } else {
-                        errors.push('One or more emails has an invalid domain');
+                        errors.push('One or more emails has an invalid domain.');
                     }
                 }
             }
@@ -70,8 +82,8 @@ export default class MultiEmailInput2 extends LightningElement {
             
             // Always set the emails, but respect the maxEmails limit
             let emailsToSet = value;
-            if (this.maxEmails && value.length > this.maxEmails) {
-                emailsToSet = value.slice(0, this.maxEmails);
+            if (value.length > effectiveMaxEmails) {
+                emailsToSet = value.slice(0, effectiveMaxEmails);
             }
             
             this.setEmails(emailsToSet);
@@ -86,6 +98,26 @@ export default class MultiEmailInput2 extends LightningElement {
     
     set emailCollection(value) {
         this._emailCollection = value;
+    }
+
+    // Define getter for emailList property (comma-delimited string)
+    @api
+    get emailList() {
+        // Return a comma-delimited string of email addresses
+        return this._emailCollection.join(',');
+    }
+    
+    // Gets the effective maximum number of emails allowed
+    getEffectiveMaxEmails() {
+        // If a maxEmails value is provided and is a valid number between 0 and ABSOLUTE_MAX_EMAILS, use it
+        if (this.maxEmails !== undefined && this.maxEmails !== null) {
+            const parsedMax = parseInt(this.maxEmails, 10);
+            if (!isNaN(parsedMax) && parsedMax >= 0 && parsedMax <= this.ABSOLUTE_MAX_EMAILS) {
+                return parsedMax;
+            }
+        }
+        // Otherwise, use the absolute maximum
+        return this.ABSOLUTE_MAX_EMAILS;
     }
          
     // Check if error message contains HTML tags (rich text)
@@ -175,6 +207,14 @@ export default class MultiEmailInput2 extends LightningElement {
         this.errorMessage = message;
     }
     
+    // Helper method to determine if a message is rich text
+    isRichText(message) {
+        return message && (
+            message.includes('<') && 
+            message.includes('>')
+        );
+    }
+    
     // Method to validate and add emails
     validateAndAddEmail(emailValue) {
         const email = emailValue.trim();
@@ -183,30 +223,44 @@ export default class MultiEmailInput2 extends LightningElement {
         
         // First validate basic email format
         if (!this.isValidEmail(email)) {
-            this.setError('Please enter a valid email address');
-            return;
-        }
-        
-        // Then validate against allowed domains
-        if (!this.isValidDomain(email)) {
-            // Use custom validation error message if provided, otherwise use default
-            if (this.validationErrorMessage && this.validationErrorMessage.trim() !== '') {
-                this.setError(this.validationErrorMessage);
+            if (this.invalidEmailErrorMessage && this.invalidEmailErrorMessage.trim() !== '') {
+                this.setError(this.invalidEmailErrorMessage);
             } else {
-                this.setError('Email domain is not allowed');
+                this.setError('Please enter a valid email address.');
             }
             return;
         }
         
-        // Check if we've reached maximum emails (if specified)
-        if (this.maxEmails && this.selectedEmails.length >= this.maxEmails) {
-            this.setError(`You can only add up to ${this.maxEmails} email addresses`);
+        // Then validate against domain rules
+        const domainValidation = this.isDomainValid(email);
+        if (!domainValidation.isValid) {
+            // Use appropriate error message
+            if (domainValidation.message) {
+                this.setError(domainValidation.message);
+            } else {
+                this.setError('Email domain is not allowed.');
+            }
+            return;
+        }
+        
+        // Check if we've reached maximum emails
+        const effectiveMaxEmails = this.getEffectiveMaxEmails();
+        if (this.selectedEmails.length >= effectiveMaxEmails) {
+            if (this.maxEmailsErrorMessage && this.maxEmailsErrorMessage.trim() !== '') {
+                this.setError(this.maxEmailsErrorMessage);
+            } else {
+                this.setError(`You can only add up to ${effectiveMaxEmails} email addresses.`);
+            }
             return;
         }
         
         // Check if email is already added
         if (this.selectedEmails.some(item => item.value.toLowerCase() === email.toLowerCase())) {
-            this.setError('This email has already been added');
+            if (this.duplicateEmailErrorMessage && this.duplicateEmailErrorMessage.trim() !== '') {
+                this.setError(this.duplicateEmailErrorMessage);
+            } else {
+                this.setError('This email has already been added.');
+            }
             return;
         }
         
@@ -265,24 +319,72 @@ export default class MultiEmailInput2 extends LightningElement {
     }
     
     // Validate email domain against allowed domains list
-    isValidDomain(email) {
-        // If no allowed domains specified, all domains are valid
-        if (!this.allowedDomains || this.allowedDomains.trim() === '') {
-            return true;
-        }
-        
+    isDomainValid(email) {
         // Extract domain from email
         const domain = email.split('@')[1]?.toLowerCase();
         if (!domain) return false;
         
-        // Split allowed domains by comma and trim each entry
-        const allowedDomainsList = this.allowedDomains
-            .split(',')
-            .map(d => d.trim().toLowerCase())
-            .filter(d => d !== '');
+        // If no domain rules specified, all domains are valid
+        const hasAllowedDomains = this.allowedDomains && this.allowedDomains.trim() !== '';
+        const hasBlockedDomains = this.blockedDomains && this.blockedDomains.trim() !== '';
+        
+        if (!hasAllowedDomains && !hasBlockedDomains) {
+            return true;
+        }
+        
+        // Check against blocked domains first (if specified)
+        if (hasBlockedDomains) {
+            const blockedDomainsList = this.blockedDomains
+                .split(',')
+                .map(d => d.trim().toLowerCase())
+                .filter(d => d !== '');
+                
+            // If domain matches any blocked pattern, it's invalid
+            if (blockedDomainsList.some(blockedDomain => this.domainMatchesPattern(domain, blockedDomain))) {
+                if (this.blockedDomainErrorMessage && this.blockedDomainErrorMessage.trim() !== '') {
+                    return { isValid: false, errorType: 'blocked', message: this.blockedDomainErrorMessage };
+                }
+                return { isValid: false, errorType: 'blocked', message: 'This email domain is not allowed.' };
+            }
+        }
+        
+        // If allowed domains are specified, domain must match at least one
+        if (hasAllowedDomains) {
+            const allowedDomainsList = this.allowedDomains
+                .split(',')
+                .map(d => d.trim().toLowerCase())
+                .filter(d => d !== '');
+                
+            // Check if the email domain matches any allowed pattern
+            const isAllowed = allowedDomainsList.some(allowedDomain => 
+                this.domainMatchesPattern(domain, allowedDomain));
             
-        // Check if the email domain is in the allowed list
-        return allowedDomainsList.some(allowedDomain => domain === allowedDomain);
+            if (!isAllowed) {
+                if (this.allowedDomainErrorMessage && this.allowedDomainErrorMessage.trim() !== '') {
+                    return { isValid: false, errorType: 'allowed', message: this.allowedDomainErrorMessage };
+                }
+                return { isValid: false, errorType: 'allowed', message: 'This email domain is not in the allowed list.' };
+            }
+        }
+        
+        // If we have only blocked domains and domain is not blocked, it's valid
+        return { isValid: true };
+    }
+    
+    // Helper method to check if a domain matches a pattern (including wildcards)
+    domainMatchesPattern(domain, pattern) {
+        // If the pattern is an exact match
+        if (domain === pattern) {
+            return true;
+        }
+        
+        // Check for wildcard pattern (e.g., *.example.com)
+        if (pattern.startsWith('*.')) {
+            const patternSuffix = pattern.substring(1); // get the .example.com part
+            return domain.endsWith(patternSuffix);
+        }
+        
+        return false;
     }
     
     // Generate a unique ID for each email entry
@@ -302,10 +404,14 @@ export default class MultiEmailInput2 extends LightningElement {
         // Dispatch Flow attribute change event for the output collection
         this.dispatchEvent(new FlowAttributeChangeEvent('emailCollection', emailValues));
         
+        // Also dispatch a Flow attribute change event for the comma-delimited email list
+        this.dispatchEvent(new FlowAttributeChangeEvent('emailList', emailValues.join(',')));
+        
         // Also dispatch a regular event for non-Flow usages
         this.dispatchEvent(new CustomEvent('emailschanged', {
             detail: {
-                emails: emailValues
+                emails: emailValues,
+                emailList: emailValues.join(',')
             }
         }));
     }
@@ -370,19 +476,27 @@ export default class MultiEmailInput2 extends LightningElement {
         
         // Check if required field has values
         if (this.required && this.selectedEmails.length === 0) {
-            errors.push('Please enter at least one email address');
+            errors.push('Please enter at least one email address.');
         }
         
         // Check if we're exceeding max emails
-        if (this.maxEmails && this.selectedEmails.length > this.maxEmails) {
-            errors.push(`You can only add up to ${this.maxEmails} email addresses`);
+        const effectiveMaxEmails = this.getEffectiveMaxEmails();
+        if (this.selectedEmails.length > effectiveMaxEmails) {
+            if (this.maxEmailsErrorMessage && this.maxEmailsErrorMessage.trim() !== '') {
+                errors.push(this.maxEmailsErrorMessage);
+            } else {
+                errors.push(`You can only add up to ${effectiveMaxEmails} email addresses.`);
+            }
         }
         
         // Check domain validation if needed
-        if (this.allowedDomains && this.allowedDomains.trim() !== '' && this.selectedEmails.length > 0) {
+        const hasAllowedDomains = this.allowedDomains && this.allowedDomains.trim() !== '';
+        const hasBlockedDomains = this.blockedDomains && this.blockedDomains.trim() !== '';
+        
+        if ((hasAllowedDomains || hasBlockedDomains) && this.selectedEmails.length > 0) {
             // Check if all emails pass the domain validation
             const invalidEmail = this.selectedEmails.find(emailObj => {
-                return !this.isValidDomain(emailObj.value);
+                return !this.isDomainValid(emailObj.value);
             });
             
             if (invalidEmail) {

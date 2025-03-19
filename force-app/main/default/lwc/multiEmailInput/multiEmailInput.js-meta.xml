@@ -9,20 +9,33 @@
     </targets>
     <targetConfigs>
         <targetConfig targets="lightning__FlowScreen">
+            <!-- Basic Field Configuration -->
             <property name="label" type="String" label="Label" default="Email" description="The label that appears above the email field" />
             <property name="placeholder" type="String" label="Placeholder Text" default="Enter an email address" description="Text that appears in the field when it's empty. Use placeholder text to give users a hint about what to enter in the field." />
+            <property name="helpText" type="String" label="Help Text" description="Help text for the field." />
             <property name="required" type="Boolean" label="Required" default="false" description="If set to true, the running user must enter a value. The default value is false." />
             <property name="disabled" type="Boolean" label="Disabled" default="false" description="If set to true, the user can't modify the value. The default value is false." />
-            <property name="helpText" type="String" label="Help Text" description="Help text for the field." />
-            <property name="maxEmails" type="Integer" label="Maximum Emails" description="Maximum number of emails allowed. Leave blank for no limit." />
-            <property name="allowedDomains" type="String" label="Allowed Domains" description="Comma-separated list of allowed email domains (e.g., 'example.com,company.org'). Leave blank to allow all domains." />
-            <property name="validationErrorMessage" type="String" label="Allowed Domains Error Message" description="Select a resource to use as your error message. Supports rich text." />
+            
+            <!-- Email Limits Configuration -->
+            <property name="maxEmails" type="Integer" label="Maximum Emails" min="0" max="150" description="Maximum number of emails allowed (0-150). Leave blank to use default limit of 150." />
+            
+            <!-- Domain Filtering Configuration -->
+            <property name="allowedDomains" type="String" label="Allowed Domains" description="Comma-separated list of allowed email domains (e.g., 'example.com,*.edu'). Leave blank to allow all domains. Supports wildcards with * prefix." />
+            <property name="blockedDomains" type="String" label="Blocked Domains" description="Comma-separated list of blocked email domains (e.g., 'spam.com,*.xyz'). Supports wildcards with * prefix." />
+            
+            <!-- Custom Error Messages -->
+            <property name="invalidEmailErrorMessage" type="String" label="Invalid Email Error Message" description="Custom error message when an invalid email format is entered. Supports rich text." />
+            <property name="maxEmailsErrorMessage" type="String" label="Maximum Emails Error Message" description="Custom error message when maximum emails limit is reached. Supports rich text." />
+            <property name="duplicateEmailErrorMessage" type="String" label="Duplicate Email Error Message" description="Custom error message when attempting to add an email that already exists. Supports rich text." />
+            <property name="allowedDomainErrorMessage" type="String" label="Allowed Domain Error Message" description="Custom error message when an email domain is not in the allowed list. Supports rich text." />
+            <property name="blockedDomainErrorMessage" type="String" label="Blocked Domain Error Message" description="Custom error message when an email domain is in the blocked list. Supports rich text." />
             
             <!-- Input property to set initial values -->
-            <property name="value" type="String[]" label="Value" description="Select a resource to pre-populate your collection. If you enable restricted domains, all emails in this collection must be valid." role="inputOnly" />
+            <property name="value" type="String[]" label="Value" description="Select a resource to pre-populate your collection. If you enable domain restrictions, all emails in this collection must be valid." role="inputOnly" />
             
             <!-- Output property for collected emails -->
             <property name="emailCollection" type="String[]" label="Email Collection" description="Output collection of the email addresses." role="outputOnly" />
+            <property name="emailList" type="String" label="Email List" description="Output comma-delimited string of email addresses that can be used with Send Email Action for BCC and CC Recipient Address Lists." role="outputOnly" />
         </targetConfig>
     </targetConfigs>
 </LightningComponentBundle>
