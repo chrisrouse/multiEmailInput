@@ -9,6 +9,11 @@ This component works with SLDS1 and SLDS2. It looks great in SLDS2!
 # Installation
 You can download the files directly and install them through VS Code. I'm working on getting package links that can be upgraded. 
 
+## Package Links
+[Sandbox](https://test.salesforce.com/packaging/installPackage.apexp?p0=04tHo000000tBg3IAE)
+[Production](https://login.salesforce.com/packaging/installPackage.apexp?p0=04tHo000000tBg3IAE)
+
+
 # Setup
 ![2025-03-14_17-03-41](https://github.com/user-attachments/assets/0d108a77-60e5-4771-ad90-d5b84b9f25cf)
 
