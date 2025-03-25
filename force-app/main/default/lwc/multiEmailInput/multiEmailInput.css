@@ -22,8 +22,14 @@
 .slds-pill_container {
     display: flex;
     flex-wrap: wrap;
-    margin-top: 0.5rem;
     border: none;
+    /* Remove margin-top to prevent space when empty */
+    min-height: 0;
+}
+
+/* Add margin only when pill container has content */
+.slds-pill_container.has-pills {
+    margin-top: 0.5rem;
 }
 
 /* Ensure the form element has the right spacing */

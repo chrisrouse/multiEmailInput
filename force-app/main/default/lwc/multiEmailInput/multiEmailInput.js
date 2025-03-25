@@ -31,6 +31,13 @@ export default class MultiEmailInput extends LightningElement {
     _value = [];
     _emailCollection = [];
     
+    // Get dynamic class for pill container
+    get pillContainerClass() {
+        return this.selectedEmails.length > 0 
+            ? 'slds-pill_container has-pills' 
+            : 'slds-pill_container';
+    }
+    
     // Define getters and setters for input property
     @api
     get value() {
@@ -496,7 +503,8 @@ export default class MultiEmailInput extends LightningElement {
         if ((hasAllowedDomains || hasBlockedDomains) && this.selectedEmails.length > 0) {
             // Check if all emails pass the domain validation
             const invalidEmail = this.selectedEmails.find(emailObj => {
-                return !this.isDomainValid(emailObj.value);
+                const result = this.isDomainValid(emailObj.value);
+                return !result.isValid;
             });
             
             if (invalidEmail) {

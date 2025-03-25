@@ -75,8 +75,8 @@
                 </template>
             </div>
             
-            <!-- Email tokens container using SLDS pill container -->
-            <div class="slds-pill_container" role="listbox" aria-orientation="horizontal">
+            <!-- Email tokens container using SLDS pill container with dynamic has-pills class -->
+            <div class={pillContainerClass} role="listbox" aria-orientation="horizontal">
                 <template for:each={selectedEmails} for:item="email">
                     <!-- Render enabled pills with remove button -->
                     <template if:false={disabled}>
