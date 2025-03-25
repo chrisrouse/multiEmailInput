@@ -1,5 +1,7 @@
 # Hello, World!
 
+[Read the full changelog here.](https://github.com/chrisrouse/multiEmailInput/blob/main/CHANGELOG.md)
+
 Thanks for checking out the Multi Email Input LWC for Salesforce Screen Flows! I built this package because I couldn't find any other component that did what I wanted. While working on a form being built in a screen flow I had a requirement to allow the end users to enter several additional emails. That's fine, users can enter it in a text box and I can process it after with several extra steps, but what if there was an easier way??? Enter **Multi Email Input**! No more formulas or loops to parse user data that may or may not follow a consistent pattern. No clunky repeater element to deal with. This is a simple way to capture as many additional email addresses as your end user wants to enter!
 
 This component works with SLDS1 and SLDS2. It looks great in SLDS2!
@@ -21,58 +23,19 @@ Feel free to install the files diretly or you can use the package links below. P
 This component has several customizable fields.
 1. **API Name** You know this field!
 2. **Allowed Domains** Input a comma-seperated list of domains. This can be created with a text collection or as plain text. *Example: gmail.com, yahoo.com, aol.com*.
-3. **Allowed Domains Error Message** Enter a custom error message. This supports plain text, a text string, or rich text. If you use plain text or a text string, the message is displayed using the standard Salesforce validation error style. Rich text is fully formatted.
-4. **Disabled** Set this to true or false using a global variable or a formula. When Disabled=TRUE, pills are hidden.
-5. **Help Text** Add useful help text for your users. Support plain text or a flow resource. Does not support rich text.
-6. **Label** Give your field a name.
-7. **Maximum Emails** Limit how many emails your user can add. Leave blank if you don't want to limit this.
-8. **Placeholder Text** You can change this to your own placeholder text.
-9. **Required** Use a global variable or a formula to make this field required.
-10. **Value** Select a text collection of email addresses to prepolate the component.
-11. **Output Variable** The component outputs `{!apiName.emailCollection}` with this formatting: '[email@one.com, email@two.com, email@three.com]`.
-
-# Error Handling
-## Allowed Domains
-1. Enter your list of allowed domains or enter a resource for the domains.
-
-<img width="413" alt="Screenshot 2025-03-14 at 5 28 07 PM" src="https://github.com/user-attachments/assets/b47b43b0-1266-4109-9962-aace23d9d878" />
-
-
-2. When the user enters an invalid domain, they will be shown an error.
-
-<img width="342" alt="Screenshot 2025-03-14 at 5 28 45 PM" src="https://github.com/user-attachments/assets/1ace7e55-0ba2-43da-831f-c65c24336e0d" />
-
-
-3. Error messages support rich text.
-
-<img width="1468" alt="Screenshot 2025-03-14 at 5 31 13 PM" src="https://github.com/user-attachments/assets/b60bdb2d-cc45-472c-a67a-b727190f1852" />
-
-## Duplicate Entries
-Duplicate Entries are automatically prevented. This error message is not configurable.
-
-<img width="420" alt="Screenshot 2025-03-14 at 5 34 15 PM" src="https://github.com/user-attachments/assets/d764f741-8f95-4bb8-bfab-239ec8c9c33a" />
-
-## Maximum Emails
-
-Limit how many emails a user can enter. When they try to enter n+1, they are shown a default error message. This message cannot be configured.
-
-<img width="413" alt="Screenshot 2025-03-14 at 5 35 29 PM" src="https://github.com/user-attachments/assets/dcf335a2-f40d-46ef-88cd-16f668f28b65" />
-
-<img width="843" alt="Screenshot 2025-03-14 at 5 35 13 PM" src="https://github.com/user-attachments/assets/6ed98f04-737d-4584-a1b1-ae8780e8a180" />
-
-## Invalid Emals
-Email addresses are validated with a bit of regex to ensure general compatibility with email systems. This error message is not currently customizable. 
-
-<img width="455" alt="Screenshot 2025-03-14 at 5 37 13 PM" src="https://github.com/user-attachments/assets/3457c4b8-c328-4b39-96ca-5dc805a1d700" />
-
-# Help Text
-
-<img width="467" alt="Screenshot 2025-03-14 at 5 40 16 PM" src="https://github.com/user-attachments/assets/b0bc4a7c-f194-4b2a-a9b6-897dd5268d8a" />
-
+3. **Blocked Domains** Input a comma-seperated list of domains. This can be created with a text collection or as plain text. *Example: gmail.com, yahoo.com, aol.com*.
+4. **Wildcard Domains** You can now include `*.edu`, for example, in the allowed or blocked list. 
+5. **Disabled** Set this to true or false using a global variable or a formula. When Disabled=TRUE, pills are hidden.
+8. **Maximum Emails** Limit how many emails your user can add. Leave blank if you don't want to limit this. Has a default max of 150, which is the Salesforce limit for emails.
+10. **Required** Use a global variable or a formula to make this field required.
+11. **Value** Select a text collection of email addresses to prepolate the component.
+12. **Output Variables** Automatically output both a collection `[email;email]` and text `email, email` from the component. If you're using the native Send Email flow action, this allows you to use the same component with the Recipient Collection or with the CC/BCC fields using the text output.
+13. **Error Messages** Everything has default error messages built in, but you can also use custom error messages, including rich text for most of the fields.
+    
 
 # Entering email addresses
 
-After typing in a valid email address, press space, enter, or tab to add the address. Space and enter will keep the focus in the text field while tab will move to the next selection.
+After typing in a valid email address, press space, enter, or tab to add the address. Space and enter will keep the focus in the text field while tab will move to the next selection. Email inputs are evaluated by the Allowed Domains and Blocked Domains list simultaneously. 
 
 # Remove email address
 
