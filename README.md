@@ -1,7 +1,5 @@
 # Hello, World!
 
-[Read the full changelog here.](https://github.com/chrisrouse/multiEmailInput/blob/main/CHANGELOG.md)
-
 Thanks for checking out the Multi Email Input LWC for Salesforce Screen Flows! I built this package because I couldn't find any other component that did what I wanted. While working on a form being built in a screen flow I had a requirement to allow the end users to enter several additional emails. That's fine, users can enter it in a text box and I can process it after with several extra steps, but what if there was an easier way??? Enter **Multi Email Input**! No more formulas or loops to parse user data that may or may not follow a consistent pattern. No clunky repeater element to deal with. This is a simple way to capture as many additional email addresses as your end user wants to enter!
 
 This component works with SLDS1 and SLDS2. It looks great in SLDS2!
@@ -13,10 +11,12 @@ Feel free to install the files diretly or you can use the package links below. P
 
 ## Package Links
 
-There is a bug in the current version. If you don't set an allowed or blocked domain, you will run into a validation error.
-[Sandbox](https://test.salesforce.com/packaging/installPackage.apexp?p0=04tHo000000tBg3IAE)
+Latest Version is 1.1.2. 
+[CHANGELOG](https://github.com/chrisrouse/multiEmailInput/blob/main/CHANGELOG.md)
 
-[Production](https://login.salesforce.com/packaging/installPackage.apexp?p0=04tHo000000tBg3IAE)
+[Sandbox](https://test.salesforce.com/packaging/installPackage.apexp?p0=04tHo000000tBkaIAE)
+
+[Production](https://login.salesforce.com/packaging/installPackage.apexp?p0=04tHo000000tBkaIAE)
 
 
 # Setup
