@@ -63,10 +63,20 @@ export default class MultiEmailInput extends LightningElement {
             
             if (validationNeeded) {
                 // Find any emails with invalid domains
-                const invalidEmails = value.filter(email => !this.isDomainValid(email));
+                const invalidEmails = value.filter(email => {
+                    const result = this.isDomainValid(email);
+                    return !result.isValid;
+                });
+                
                 if (invalidEmails.length > 0) {
-                    if (this.validationErrorMessage && this.validationErrorMessage.trim() !== '') {
-                        errors.push(this.validationErrorMessage);
+                    // Get the specific validation message for the first invalid email
+                    if (invalidEmails.length === 1) {
+                        const validationResult = this.isDomainValid(invalidEmails[0]);
+                        if (validationResult.message) {
+                            errors.push(validationResult.message);
+                        } else {
+                            errors.push('Email domain is not allowed.');
+                        }
                     } else {
                         errors.push('One or more emails has an invalid domain.');
                     }
@@ -326,57 +336,57 @@ export default class MultiEmailInput extends LightningElement {
     }
     
     // Validate email domain against allowed domains list
-    isDomainValid(email) {
-        // Extract domain from email
-        const domain = email.split('@')[1]?.toLowerCase();
-        if (!domain) return false;
-        
-        // If no domain rules specified, all domains are valid
-        const hasAllowedDomains = this.allowedDomains && this.allowedDomains.trim() !== '';
-        const hasBlockedDomains = this.blockedDomains && this.blockedDomains.trim() !== '';
-        
-        if (!hasAllowedDomains && !hasBlockedDomains) {
-            return true;
-        }
-        
-        // Check against blocked domains first (if specified)
-        if (hasBlockedDomains) {
-            const blockedDomainsList = this.blockedDomains
-                .split(',')
-                .map(d => d.trim().toLowerCase())
-                .filter(d => d !== '');
-                
-            // If domain matches any blocked pattern, it's invalid
-            if (blockedDomainsList.some(blockedDomain => this.domainMatchesPattern(domain, blockedDomain))) {
-                if (this.blockedDomainErrorMessage && this.blockedDomainErrorMessage.trim() !== '') {
-                    return { isValid: false, errorType: 'blocked', message: this.blockedDomainErrorMessage };
-                }
-                return { isValid: false, errorType: 'blocked', message: 'This email domain is not allowed.' };
-            }
-        }
-        
-        // If allowed domains are specified, domain must match at least one
-        if (hasAllowedDomains) {
-            const allowedDomainsList = this.allowedDomains
-                .split(',')
-                .map(d => d.trim().toLowerCase())
-                .filter(d => d !== '');
-                
-            // Check if the email domain matches any allowed pattern
-            const isAllowed = allowedDomainsList.some(allowedDomain => 
-                this.domainMatchesPattern(domain, allowedDomain));
-            
-            if (!isAllowed) {
-                if (this.allowedDomainErrorMessage && this.allowedDomainErrorMessage.trim() !== '') {
-                    return { isValid: false, errorType: 'allowed', message: this.allowedDomainErrorMessage };
-                }
-                return { isValid: false, errorType: 'allowed', message: 'This email domain is not in the allowed list.' };
-            }
-        }
-        
-        // If we have only blocked domains and domain is not blocked, it's valid
+isDomainValid(email) {
+    // Extract domain from email
+    const domain = email.split('@')[1]?.toLowerCase();
+    if (!domain) return { isValid: false, errorType: 'format', message: 'Invalid email format.' };
+    
+    // If no domain rules specified, all domains are valid
+    const hasAllowedDomains = this.allowedDomains && this.allowedDomains.trim() !== '';
+    const hasBlockedDomains = this.blockedDomains && this.blockedDomains.trim() !== '';
+    
+    if (!hasAllowedDomains && !hasBlockedDomains) {
         return { isValid: true };
     }
+    
+    // Check against blocked domains first (if specified)
+    if (hasBlockedDomains) {
+        const blockedDomainsList = this.blockedDomains
+            .split(',')
+            .map(d => d.trim().toLowerCase())
+            .filter(d => d !== '');
+            
+        // If domain matches any blocked pattern, it's invalid
+        if (blockedDomainsList.some(blockedDomain => this.domainMatchesPattern(domain, blockedDomain))) {
+            if (this.blockedDomainsErrorMessage && this.blockedDomainsErrorMessage.trim() !== '') {
+                return { isValid: false, errorType: 'blocked', message: this.blockedDomainsErrorMessage };
+            }
+            return { isValid: false, errorType: 'blocked', message: 'This email domain is not allowed.' };
+        }
+    }
+    
+    // If allowed domains are specified, domain must match at least one
+    if (hasAllowedDomains) {
+        const allowedDomainsList = this.allowedDomains
+            .split(',')
+            .map(d => d.trim().toLowerCase())
+            .filter(d => d !== '');
+            
+        // Check if the email domain matches any allowed pattern
+        const isAllowed = allowedDomainsList.some(allowedDomain => 
+            this.domainMatchesPattern(domain, allowedDomain));
+        
+        if (!isAllowed) {
+            if (this.allowedDomainsErrorMessage && this.allowedDomainsErrorMessage.trim() !== '') {
+                return { isValid: false, errorType: 'allowed', message: this.allowedDomainsErrorMessage };
+            }
+            return { isValid: false, errorType: 'allowed', message: 'This email domain is not in the allowed list.' };
+        }
+    }
+    
+    // If we have only blocked domains and domain is not blocked, it's valid
+    return { isValid: true };
+}
     
     // Helper method to check if a domain matches a pattern (including wildcards)
     domainMatchesPattern(domain, pattern) {
@@ -477,47 +487,49 @@ export default class MultiEmailInput extends LightningElement {
         }
     }
     
-    // Helper method to collect all validation errors
-    collectValidationErrors() {
-        const errors = [];
-        
-        // Check if required field has values
-        if (this.required && this.selectedEmails.length === 0) {
-            errors.push('Please enter at least one email address.');
-        }
-        
-        // Check if we're exceeding max emails
-        const effectiveMaxEmails = this.getEffectiveMaxEmails();
-        if (this.selectedEmails.length > effectiveMaxEmails) {
-            if (this.maxEmailsErrorMessage && this.maxEmailsErrorMessage.trim() !== '') {
-                errors.push(this.maxEmailsErrorMessage);
-            } else {
-                errors.push(`You can only add up to ${effectiveMaxEmails} email addresses.`);
-            }
-        }
-        
-        // Check domain validation if needed
-        const hasAllowedDomains = this.allowedDomains && this.allowedDomains.trim() !== '';
-        const hasBlockedDomains = this.blockedDomains && this.blockedDomains.trim() !== '';
-        
-        if ((hasAllowedDomains || hasBlockedDomains) && this.selectedEmails.length > 0) {
-            // Check if all emails pass the domain validation
-            const invalidEmail = this.selectedEmails.find(emailObj => {
-                const result = this.isDomainValid(emailObj.value);
-                return !result.isValid;
-            });
-            
-            if (invalidEmail) {
-                if (this.validationErrorMessage && this.validationErrorMessage.trim() !== '') {
-                    errors.push(this.validationErrorMessage);
-                } else {
-                    errors.push('One or more emails has an invalid domain');
-                }
-            }
-        }
-        
-        return errors;
+// Helper method to collect all validation errors
+collectValidationErrors() {
+    const errors = [];
+    
+    // Check if required field has values
+    if (this.required && this.selectedEmails.length === 0) {
+        errors.push('Please enter at least one email address.');
     }
+    
+    // Check if we're exceeding max emails
+    const effectiveMaxEmails = this.getEffectiveMaxEmails();
+    if (this.selectedEmails.length > effectiveMaxEmails) {
+        if (this.maxEmailsErrorMessage && this.maxEmailsErrorMessage.trim() !== '') {
+            errors.push(this.maxEmailsErrorMessage);
+        } else {
+            errors.push(`You can only add up to ${effectiveMaxEmails} email addresses.`);
+        }
+    }
+    
+    // Check domain validation if needed
+    const hasAllowedDomains = this.allowedDomains && this.allowedDomains.trim() !== '';
+    const hasBlockedDomains = this.blockedDomains && this.blockedDomains.trim() !== '';
+    
+    if ((hasAllowedDomains || hasBlockedDomains) && this.selectedEmails.length > 0) {
+        // Check if all emails pass the domain validation
+        const invalidEmail = this.selectedEmails.find(emailObj => {
+            const result = this.isDomainValid(emailObj.value);
+            return !result.isValid;
+        });
+        
+        if (invalidEmail) {
+            // Use either the appropriate specific error message based on the validation failure type
+            const validationResult = this.isDomainValid(invalidEmail.value);
+            if (validationResult.message) {
+                errors.push(validationResult.message);
+            } else {
+                errors.push('One or more emails has an invalid domain');
+            }
+        }
+    }
+    
+    return errors;
+}
 
     // Standard DOM validation method - required for Flow to validate properly
     @api
@@ -680,5 +692,4 @@ export default class MultiEmailInput extends LightningElement {
     // Clean up event listeners when component is removed
     disconnectedCallback() {
         this.removeDocumentClickListener();
-    }
-}
+    }}

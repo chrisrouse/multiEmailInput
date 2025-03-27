@@ -4,8 +4,8 @@
       "path": "force-app",
       "default": true,
       "package": "Multi Email Input",
-      "versionName": "Version 1.0.1",
-      "versionNumber": "1.0.1.NEXT",
+      "versionName": "Version 1.1.2",
+      "versionNumber": "1.1.2.NEXT",
       "versionDescription": "An LWC for use in screen flows to allow user to enter multiple email addresses."
     },
     {
@@ -28,6 +28,9 @@
     "Multi Email Input@1.0.0-2": "04tHo000000tBfoIAE",
     "Multi Email Input@1.0.0-3": "04tHo000000tBftIAE",
     "Multi Email Input@1.0.1-1": "04tHo000000tBfyIAE",
-    "Multi Email Input@1.0.1-2": "04tHo000000tBg3IAE"
+    "Multi Email Input@1.0.1-2": "04tHo000000tBg3IAE",
+    "Multi Email Input@1.1.1-1": "04tHo000000tBkQIAU",
+    "Multi Email Input@1.1.1-2": "04tHo000000tBkVIAU",
+    "Multi Email Input@1.1.2-1": "04tHo000000tBkaIAE"
   }
 }

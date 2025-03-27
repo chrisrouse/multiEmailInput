@@ -1,7 +1,7 @@
 # Multi Email Input LWC Changelog
 
-## v 1.0
-- Initial release! 
+## v 1.1.1
+- If no allowed or blocked domain was specified, the component said all emails were invalid. 
 
 ## v 1.1
 
@@ -53,3 +53,6 @@
 - Added new properties with appropriate descriptions and validation
 - Organized properties into logical groups for better user experience
 - Added min/max validation for the `maxEmails` property
+
+## v 1.0
+- Initial release! 
