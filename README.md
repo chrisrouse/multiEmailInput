@@ -12,6 +12,8 @@ This component works with SLDS1 and SLDS2. It looks great in SLDS2!
 Feel free to install the files diretly or you can use the package links below. Package links may be behind the source code at times.
 
 ## Package Links
+
+There is a bug in the current version. If you don't set an allowed or blocked domain, you will run into a validation error.
 [Sandbox](https://test.salesforce.com/packaging/installPackage.apexp?p0=04tHo000000tBg3IAE)
 
 [Production](https://login.salesforce.com/packaging/installPackage.apexp?p0=04tHo000000tBg3IAE)
