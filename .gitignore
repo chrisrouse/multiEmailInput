@@ -43,3 +43,4 @@ $RECYCLE.BIN/
 **/__pycache__/
 **/.venv/
 **/venv/
+.vscode/settings.json
