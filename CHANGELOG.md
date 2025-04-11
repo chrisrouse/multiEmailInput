@@ -1,5 +1,8 @@
 # Multi Email Input LWC Changelog
 
+## c 1.2.0
+- Add support for pasting email address strings with mixed delimiters. 
+
 ## v 1.1.1
 - If no allowed or blocked domain was specified, the component said all emails were invalid. 
 

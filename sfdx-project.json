@@ -1,47 +1,77 @@
 {
+
   "packageDirectories": [
+
     {
+
       "path": "force-app",
-<<<<<<< HEAD
+
       "default": true,
+
       "package": "Multi Email Input",
+
+
       "versionName": "Version 1.1.2",
+
+
       "versionNumber": "1.1.2.NEXT",
+
       "versionDescription": "An LWC for use in screen flows to allow user to enter multiple email addresses."
+
     },
+
     {
+
       "versionName": "ver 0.1",
+
       "versionNumber": "0.1.0.NEXT",
+
       "path": "force-app",
+
       "default": false,
+
       "package": "Multi Email Input",
+
       "versionDescription": "An LWC for use in screen flows to allow user to enter multiple email addresses."
+
     }
+
   ],
+
   "namespace": "",
+
   "sfdcLoginUrl": "https://login.salesforce.com",
+
   "sourceApiVersion": "63.0",
+
   "packageAliases": {
+
     "Multi Email Input LWC": "0HoHo0000010wBuKAI",
+
     "Multi Email Input LWC@1.0.0-1": "04tHo000000tBfeIAE",
+
     "Multi Email Input": "0HoHo0000010wBzKAI",
+
     "Multi Email Input@1.0.0-1": "04tHo000000tBfjIAE",
+
     "Multi Email Input@1.0.0-2": "04tHo000000tBfoIAE",
+
     "Multi Email Input@1.0.0-3": "04tHo000000tBftIAE",
+
     "Multi Email Input@1.0.1-1": "04tHo000000tBfyIAE",
+
+
     "Multi Email Input@1.0.1-2": "04tHo000000tBg3IAE",
+
+
     "Multi Email Input@1.1.1-1": "04tHo000000tBkQIAU",
+
+
     "Multi Email Input@1.1.1-2": "04tHo000000tBkVIAU",
+
+
     "Multi Email Input@1.1.2-1": "04tHo000000tBkaIAE"
+
   }
+
 }
-=======
-      "default": true
-    }
-  ],
-  "name": "multiEmailInput",
-  "namespace": "",
-  "sfdcLoginUrl": "https://login.salesforce.com",
-  "sourceApiVersion": "63.0"
-}
->>>>>>> 879ae98 (working version)
