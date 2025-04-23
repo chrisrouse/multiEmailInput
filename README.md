@@ -11,12 +11,12 @@ Feel free to install the files diretly or you can use the package links below. P
 
 ## Package Links
 
-Latest Version is 1.1.2. 
+Latest Version is 1.2.0. 
 [CHANGELOG](https://github.com/chrisrouse/multiEmailInput/blob/main/CHANGELOG.md)
 
-[Sandbox](https://test.salesforce.com/packaging/installPackage.apexp?p0=04tHo000000tBkaIAE)
+[Sandbox](https://test.salesforce.com/packaging/installPackage.apexp?p0=04tHo000000tCyvIAE)
 
-[Production](https://login.salesforce.com/packaging/installPackage.apexp?p0=04tHo000000tBkaIAE)
+[Production](https://login.salesforce.com/packaging/installPackage.apexp?p0=04tHo000000tCyvIAE)
 
 
 # Setup

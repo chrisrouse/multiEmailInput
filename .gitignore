@@ -44,3 +44,4 @@ $RECYCLE.BIN/
 **/.venv/
 **/venv/
 .vscode/settings.json
+sfdx-project.json
