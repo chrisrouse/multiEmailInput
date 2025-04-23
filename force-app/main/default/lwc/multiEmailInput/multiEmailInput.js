@@ -1000,38 +1000,81 @@ export default class MultiEmailInput extends LightningElement {
     /**
      * Toggle help popover visibility
      */
-    toggleHelpPopover(event) {
-        // Prevent event from bubbling up
-        event.preventDefault();
-        event.stopPropagation();
+// Focus the first focusable element in the popover
+focusFirstElement() {
+    const closeButton = this.template.querySelector('.slds-popover__close');
+    if (closeButton) {
+        closeButton.focus();
+    }
+}
+
+// Focus the last focusable element in the popover
+focusLastElement() {
+    const closeButton = this.template.querySelector('.slds-popover__close');
+    if (closeButton) {
+        closeButton.focus();
+    }
+}
+
+// Update your toggleHelpPopover method
+toggleHelpPopover(event) {
+    // Prevent event from bubbling up
+    event.preventDefault();
+    event.stopPropagation();
+    
+    // Toggle popover state
+    this.showHelpPopover = !this.showHelpPopover;
+    
+    // If opening the popover, determine position and add document click listener
+    if (this.showHelpPopover) {
+        // Calculate if we need to show popover above or below based on viewport position
+        this.determinePopoverPosition();
         
-        // Toggle popover state
-        this.showHelpPopover = !this.showHelpPopover;
-        
-        // If opening the popover, determine position and add document click listener
-        if (this.showHelpPopover) {
-            // Calculate if we need to show popover above or below based on viewport position
-            this.determinePopoverPosition();
+        // Use setTimeout to avoid the current click event from immediately closing the popover
+        setTimeout(() => {
+            document.addEventListener('click', this.handleDocumentClick);
             
-            // Use setTimeout to avoid the current click event from immediately closing the popover
-            setTimeout(() => {
-                document.addEventListener('click', this.handleDocumentClick);
-                
-                // Focus the close button for keyboard accessibility
-                const closeButton = this.template.querySelector('.slds-popover__close');
-                if (closeButton) {
-                    closeButton.focus();
-                }
-                
-                // Add keydown listener for Escape key to close the popover
-                document.addEventListener('keydown', this.handleEscapeKey);
-            }, 10);
-        } else {
-            // If closing, remove the listeners
-            this.removeDocumentClickListener();
-            document.removeEventListener('keydown', this.handleEscapeKey);
+            // Focus the close button for keyboard accessibility
+            this.focusFirstElement();
+            
+            // Add keydown listener for Escape key to close the popover
+            document.addEventListener('keydown', this.handleEscapeKey);
+        }, 10);
+    } else {
+        // If closing, remove the listeners
+        this.removeDocumentClickListener();
+        document.removeEventListener('keydown', this.handleEscapeKey);
+        
+        // Return focus to the trigger button
+        const helpButton = this.template.querySelector('.slds-button_icon');
+        if (helpButton) {
+            helpButton.focus();
         }
     }
+}
+
+// Update your closeHelpPopover method
+closeHelpPopover(event) {
+    // Prevent event from bubbling up
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+    
+    // Get reference to help button before closing popover
+    const helpButton = this.template.querySelector('.slds-button_icon');
+    
+    // Close the popover
+    this.showHelpPopover = false;
+    
+    // Remove document click listener
+    this.removeDocumentClickListener();
+    
+    // Return focus to the help button for keyboard accessibility
+    if (helpButton) {
+        helpButton.focus();
+    }
+}
     
     /**
      * Determine if popover should appear above or below based on viewport position

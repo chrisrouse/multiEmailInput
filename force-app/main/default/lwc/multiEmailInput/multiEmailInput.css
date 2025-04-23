@@ -1,8 +1,8 @@
-/* multiEmailInput.css - Using SLDS standard classes where possible */
+/* multiEmailInput.css - Minimal styling using SLDS patterns */
 
 /* Standard error message styling to match native Salesforce styling */
 .slds-form-element__help {
-    color: rgb(194, 57, 52);
+    color: var(--slds-g-color-error-text, rgb(194, 57, 52));
     font-size: 0.75rem;
     margin-top: 0.125rem;
     display: block;
@@ -43,17 +43,6 @@
     z-index: 9100;
     min-width: 280px;
     max-width: 320px;
-    border-radius: var(--lwc-borderRadiusMedium, 0.25rem);
-    width: var(--lwc-sizeMedium, 20rem);
-    min-height: 2rem;
-    background-color: var(--slds-g-color-neutral-base-100, var(--lwc-colorBackgroundAlt, rgb(255, 255, 255)));
-    display: inline-block;
-    box-shadow: 0 2px 3px 0 rgba(0, 0, 0, 0.16);
-    border: var(--lwc-borderWidthThin, 1px) solid var(--slds-g-color-border-base-1, var(--lwc-colorBorder, rgb(201, 201, 201)));
-}
-
-.slds-popover p {
-    color: #181818;
 }
 
 /* Position for top-aligned popover */

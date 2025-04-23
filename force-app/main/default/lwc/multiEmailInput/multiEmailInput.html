@@ -2,10 +2,10 @@
     <div class="slds-form-element" role="group" aria-labelledby="email-input-label" class:slds-has-error={hasError}>
         <div class="slds-form-element__label-container">
             <!-- Label with required indicator -->
-            <span id="email-input-label" class="slds-form-element__label">
+            <label class="slds-form-element__label" id="email-input-label" for="email-input">
                 <abbr class="slds-required" title="required" if:true={required}>*</abbr>
                 {label}
-            </span>
+            </label>
             
             <!-- SLDS standard help text icon implementation -->
             <div if:true={helpText} class="slds-form-element__icon">
@@ -24,29 +24,33 @@
                     <span class="slds-assistive-text">Help</span>
                 </button>
                 
-                <!-- Help popover with screen-aware positioning -->
+                <!-- Help popover with screen-aware positioning and focus management -->
                 <section if:true={showHelpPopover} 
-                        class={popoverClass} 
-                        aria-label="Help information" 
-                        aria-describedby="help-popover-body" 
-                        role="dialog"
-                        style="position: absolute; z-index: 9100; left: -16px; right: auto;">
-                        
-                        <div class="slds-popover__body">
-                            <button class="slds-button slds-button_icon slds-button_icon-small slds-float_right slds-popover__close" 
-                                title="Close" 
-                                onclick={closeHelpPopover}>
-                                <lightning-icon icon-name="utility:close" size="small" class="slds-icon-utility-close"></lightning-icon>
-                                <span class="slds-assistive-text">Close</span>
-                            </button>
-                            <div class="slds-rich-text-editor__output">
-                                <div id="help-popover-body" class="slds-rich-text-content">
-                                    <p>{helpText}</p>
-                                </div>
-                            </div>
+                    class={popoverClass} 
+                    aria-label="Help information" 
+                    aria-describedby="help-popover-body" 
+                    role="dialog"
+                    style="position: absolute; z-index: 9100; left: -16px; right: auto;">
+                    
+                    <!-- First focusable element as a trap -->
+                    <div tabindex="0" class="slds-assistive-text" onfocus={focusLastElement}>Start of dialog</div>
+                    
+                    <div class="slds-popover__body slds-popover__body_small">
+                        <button class="slds-button slds-button_icon slds-button_icon-small slds-float_right slds-popover__close" 
+                            title="Close" 
+                            onclick={closeHelpPopover}
+                            tabindex="0">
+                            <lightning-icon icon-name="utility:close" size="small" class="slds-icon-utility-close"></lightning-icon>
+                            <span class="slds-assistive-text">Close</span>
+                        </button>
+                        <div class="slds-popover__body" id="help-popover-body">
+                            <lightning-formatted-rich-text class="slds-rich-text-editor__output" value={helpText}></lightning-formatted-rich-text>
                         </div>
-                    </section>
-
+                    </div>
+                    
+                    <!-- Last focusable element as a trap -->
+                    <div tabindex="0" class="slds-assistive-text" onfocus={focusFirstElement}>End of dialog</div>
+                </section>
             </div>
         </div>
         
@@ -77,7 +81,7 @@
             </div>
             
             <!-- Email tokens container using SLDS pill container with dynamic has-pills class -->
-            <div class={pillContainerClass} role="listbox" aria-orientation="horizontal">
+            <div class={pillContainerClass} role="listbox" aria-label="Selected emails">
                 <template for:each={selectedEmails} for:item="email">
                     <!-- Render enabled pills with remove button -->
                     <template if:false={disabled}>

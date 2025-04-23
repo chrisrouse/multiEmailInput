@@ -5,6 +5,8 @@
 - Improve handling of validation rules for default values or copy/pasted values.
 - Fix the order of operations when validating emails and track how many addresses are still in the collection so that confusing errors aren't shown. 
 - Improve wildcard handling. Now you can use wildcard at any position, such as `*google*`, rather than only supporting at the beginning, like `*.google.com`. This now works in allowed and blocked domains.
+- Improved HTML and CSS to better support SLDS and SLDS 2 by utilizing more native code and style hooks.
+- Update handling for accessibility and keyboard navigation.
 
 ## v 1.1.1
 - If no allowed or blocked domain was specified, the component said all emails were invalid. 
