@@ -6,6 +6,11 @@ This component works with SLDS1 and SLDS2. It looks great in SLDS2!
 
 <img width="1599" alt="Screenshot 2025-03-14 at 5 43 36 PM" src="https://github.com/user-attachments/assets/ba98618c-8327-4233-8701-224b2e6aa4fe" />
 
+# Demo Video
+
+https://github.com/user-attachments/assets/813d1e08-b6f0-4878-8bd2-17c65abfc31a
+
+
 # Installation
 Feel free to install the files diretly or you can use the package links below. Package links may be behind the source code at times.
 
