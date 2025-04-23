@@ -18,6 +18,8 @@ Latest Version is 1.2.0.
 
 [Production](https://login.salesforce.com/packaging/installPackage.apexp?p0=04tHo000000tCyvIAE)
 
+[Easy Mode] Copy and paste this after your org URL to run the installer. `packaging/installPackage.apexp?p0=04tHo000000tCyvIAE`
+
 
 # Setup
 ![2025-03-14_17-03-41](https://github.com/user-attachments/assets/0d108a77-60e5-4771-ad90-d5b84b9f25cf)
