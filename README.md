@@ -11,14 +11,14 @@ Feel free to install the files diretly or you can use the package links below. P
 
 ## Package Links
 
-Latest Version is 1.2.0. 
+Latest Version is 1.2.1. 
 [CHANGELOG](https://github.com/chrisrouse/multiEmailInput/blob/main/CHANGELOG.md)
 
-[Sandbox](https://test.salesforce.com/packaging/installPackage.apexp?p0=04tHo000000tCyvIAE)
+[Sandbox](https://test.salesforce.com/packaging/installPackage.apexp?p0=04tHo000000tCz0IAE)
 
-[Production](https://login.salesforce.com/packaging/installPackage.apexp?p0=04tHo000000tCyvIAE)
+[Production](https://login.salesforce.com/packaging/installPackage.apexp?p0=04tHo000000tCz0IAE)
 
-[Easy Mode] Copy and paste this after your org URL to run the installer. `packaging/installPackage.apexp?p0=04tHo000000tCyvIAE`
+[Easy Mode] Copy and paste this after your org URL to run the installer. `packaging/installPackage.apexp?p0=04tHo000000tCz0IAE`
 
 
 # Setup
@@ -47,6 +47,3 @@ Click the X in the pill to remove na email address from the collection.
 
 # Outputs
 You can make everything to custom variables if you want to.
-
-# Known Issues and Limitations
-1. If your initial collection (Value) does not meet the limits of Allowed Domains and Maximum Emails, it will not be evaluated until you attempt to add another value to the collection or when you advance to the next screen. It is not evaluated at the initial loading of the screen.

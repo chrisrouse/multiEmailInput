@@ -4,9 +4,9 @@
       "path": "force-app",
       "default": true,
       "package": "Multi Email Input",
-      "versionName": "Version 1.2.0",
-      "versionNumber": "1.2.0.NEXT",
-      "versionDescription": "An LWC for use in screen flows to allow user to enter multiple email addresses."
+      "versionName": "Version 1.2.1",
+      "versionNumber": "1.2.1.NEXT",
+      "versionDescription": "An LWC for use in screen flows to allow user to enter multiple email addresses. For more information, please visit: https://github.com/chrisrouse/multiEmailInput/blob/main/README.md"
     },
     {
       "versionName": "ver 0.1",
@@ -14,7 +14,7 @@
       "path": "force-app",
       "default": false,
       "package": "Multi Email Input",
-      "versionDescription": "An LWC for use in screen flows to allow user to enter multiple email addresses."
+      "versionDescription": "An LWC for use in screen flows to allow user to enter multiple email addresses. For more information, please visit: https://github.com/chrisrouse/multiEmailInput/blob/main/README.md"
     }
   ],
   "namespace": "",
@@ -32,6 +32,7 @@
     "Multi Email Input@1.1.1-1": "04tHo000000tBkQIAU",
     "Multi Email Input@1.1.1-2": "04tHo000000tBkVIAU",
     "Multi Email Input@1.1.2-1": "04tHo000000tBkaIAE",
-    "Multi Email Input@1.2.0-1": "04tHo000000tCyvIAE"
+    "Multi Email Input@1.2.0-1": "04tHo000000tCyvIAE",
+    "Multi Email Input@1.2.1-1": "04tHo000000tCz0IAE"
   }
 }

@@ -10,6 +10,7 @@
 - Improve wildcard handling. Now you can use wildcard at any position, such as `*google*`, rather than only supporting at the beginning, like `*.google.com`. This now works in allowed and blocked domains.
 - Improved HTML and CSS to better support SLDS and SLDS 2 by utilizing more native code and style hooks.
 - Update handling for accessibility and keyboard navigation.
+- Email addresses added as a default input or via copy/paste now get validated immediately to reduce errors.
 
 ## v 1.1.1
 - If no allowed or blocked domain was specified, the component said all emails were invalid. 
