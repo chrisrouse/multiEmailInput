@@ -1,6 +1,9 @@
 # Multi Email Input LWC Changelog
 
-## v 1.2.0
+## v 1.2.1 (04/23/2025)
+- Add additional support for copy/paste from email clients. Now if your emails are formatted like `<email@test.com>` or `Name <email@test.com>` it will parse properly.
+
+## v 1.2.0 (04/23/25)
 - Add support for pasting email address strings with mixed delimiters.
 - Improve handling of validation rules for default values or copy/pasted values.
 - Fix the order of operations when validating emails and track how many addresses are still in the collection so that confusing errors aren't shown. 

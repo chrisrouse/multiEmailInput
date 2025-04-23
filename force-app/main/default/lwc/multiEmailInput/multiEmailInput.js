@@ -615,240 +615,271 @@ export default class MultiEmailInput extends LightningElement {
         }
     }
     
-    /**
-     * Handles paste events for multiple emails
-     * Parses pasted content for multiple email addresses
-     * Validates and adds all valid emails
-     */
-    handlePaste(event) {
-        // Don't process if disabled
-        if (this.disabled) return;
+ /**
+ * Handles paste events for multiple emails
+ * Parses pasted content for multiple email addresses
+ * Validates and adds all valid emails
+ * Enhanced to support angle bracket email formats
+ */
+handlePaste(event) {
+    // Don't process if disabled
+    if (this.disabled) return;
+    
+    // Prevent the default paste behavior
+    event.preventDefault();
+    
+    // Get pasted text from clipboard
+    const pastedText = (event.clipboardData || window.clipboardData).getData('text');
+    
+    if (pastedText && pastedText.trim()) {
+        // Create an array to store all found emails
+        let emails = [];
         
-        // Prevent the default paste behavior
-        event.preventDefault();
+        // Create a copy of the pasted text that we'll modify as we process it
+        let processingText = pastedText;
         
-        // Get pasted text from clipboard
-        const pastedText = (event.clipboardData || window.clipboardData).getData('text');
-        
-        if (pastedText && pastedText.trim()) {
-            // First replace all standard delimiters with a common delimiter
-            // This ensures mixed delimiters are properly handled
-            let normalizedText = pastedText
-                .replace(/[,;]/g, '|') // Replace commas and semicolons with pipe
-                .replace(/[\r\n]+/g, '|'); // Replace newlines with pipe
+        // First, try to find emails in angle brackets (name <email@example.com> format)
+        if (pastedText.includes('<') && pastedText.includes('>')) {
+            // This regex looks for email pattern inside angle brackets
+            // It ensures we're capturing actual email addresses, not just any text in angle brackets
+            const angleRegex = /(?:<)([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})(?:>)/g;
+            let match;
             
-            // Now check if there are potential space-separated emails
-            // Look for patterns that resemble email addresses (contain @)
-            if (normalizedText.includes(' ') && normalizedText.includes('@')) {
-                // This regex looks for email-like patterns and adds a delimiter before each email
-                // except the first one
-                normalizedText = normalizedText.replace(/\s+([^\s|@]+@[^\s|@]+)/g, '|$1');
+            // Find all email addresses enclosed in angle brackets
+            while ((match = angleRegex.exec(pastedText)) !== null) {
+                if (match[1] && match[1].includes('@')) {
+                    // Add to our email collection
+                    emails.push(match[1].trim());
+                    
+                    // Remove this email from the processing text to avoid duplicate processing
+                    // Replace with a space to maintain text structure
+                    processingText = processingText.replace(match[0], ' ');
+                }
+            }
+        }
+        
+        // Now parse the remaining text for regular emails
+        // Replace all standard delimiters with a common delimiter
+        let normalizedText = processingText
+            .replace(/[,;]/g, '|') // Replace commas and semicolons with pipe
+            .replace(/[\r\n]+/g, '|'); // Replace newlines with pipe
+        
+        // Check if there are potential space-separated emails
+        if (normalizedText.includes(' ') && normalizedText.includes('@')) {
+            // Add a delimiter before each email-like pattern (except the first one)
+            normalizedText = normalizedText.replace(/\s+([^\s|@]+@[^\s|@]+)/g, '|$1');
+        }
+        
+        // Split by our common delimiter and filter out empty entries
+        const regularEmails = normalizedText
+            .split('|')
+            .map(item => item.trim())
+            .filter(item => item !== '' && item.includes('@')); // Basic check for email format
+            
+        // Add regular emails to our collection
+        emails = [...emails, ...regularEmails];
+        
+        // Process emails if we found any
+        if (emails.length > 0) {
+            // Collect validation issues
+            const errors = [];
+            
+            // Filter out emails with invalid format
+            let filteredEmails = emails.filter(email => this.isValidEmail(email));
+            
+            // If some emails had invalid format, add an error message
+            const invalidFormatCount = emails.length - filteredEmails.length;
+            if (invalidFormatCount > 0) {
+                if (invalidFormatCount === 1) {
+                    errors.push('1 email with invalid format was removed.');
+                } else {
+                    errors.push(`${invalidFormatCount} emails with invalid format were removed.`);
+                }
+                
+                // If no valid emails remain, show error and stop
+                if (filteredEmails.length === 0) {
+                    this.setError(errors[0]);
+                    return;
+                }
             }
             
-            // Split by our common delimiter and filter out empty entries
-            const emails = normalizedText
-                .split('|')
-                .map(email => email.trim())
-                .filter(email => email !== '' && email.includes('@')); // Basic check for email format
+            // Continue with the rest of your validation logic...
+            // (domain validation, duplicate checking, max limit, etc.)
             
-            // Process emails if we found any
-            if (emails.length > 0) {
-                // Collect validation issues
-                const errors = [];
+            // ---- STEP 1: Apply domain validation first (allowed domains) ----
+            const hasAllowedDomains = this.allowedDomains && this.allowedDomains.trim() !== '';
+            const hasBlockedDomains = this.blockedDomains && this.blockedDomains.trim() !== '';
+            
+            // Process allowed domains first
+            if (hasAllowedDomains) {
+                // Save length before filtering
+                const beforeLength = filteredEmails.length;
                 
-                // Filter out emails with invalid format
-                let filteredEmails = emails.filter(email => this.isValidEmail(email));
-                
-                // If some emails had invalid format, add an error message
-                const invalidFormatCount = emails.length - filteredEmails.length;
-                if (invalidFormatCount > 0) {
-                    if (invalidFormatCount === 1) {
-                        errors.push('1 email with invalid format was removed.');
-                    } else {
-                        errors.push(`${invalidFormatCount} emails with invalid format were removed.`);
-                    }
-                    
-                    // If no valid emails remain, show error and stop
-                    if (filteredEmails.length === 0) {
-                        this.setError(errors[0]);
-                        return;
-                    }
-                }
-                
-                // ---- STEP 1: Apply domain validation first (allowed domains) ----
-                const hasAllowedDomains = this.allowedDomains && this.allowedDomains.trim() !== '';
-                const hasBlockedDomains = this.blockedDomains && this.blockedDomains.trim() !== '';
-                
-                // Process allowed domains first
-                if (hasAllowedDomains) {
-                    // Save length before filtering
-                    const beforeLength = filteredEmails.length;
-                    
-                    // Filter based on allowed domains
-                    filteredEmails = filteredEmails.filter(email => {
-                        const result = this.isDomainValid(email);
-                        // We're only concerned with allowedDomains errors here
-                        return result.isValid || result.errorType !== 'allowed';
-                    });
-                    
-                    // Calculate how many were removed
-                    const invalidDomainCount = beforeLength - filteredEmails.length;
-                    
-                    // Add error message if needed
-                    if (invalidDomainCount > 0) {
-                        if (invalidDomainCount === 1) {
-                            errors.push('1 email with domain not in the allowed list was removed.');
-                        } else {
-                            errors.push(`${invalidDomainCount} emails with domains not in the allowed list were removed.`);
-                        }
-                    }
-                    
-                    // If no emails remain, stop validation
-                    if (filteredEmails.length === 0) {
-                        this.setError(this.formatErrorMessages(errors));
-                        return;
-                    }
-                }
-                
-                // ---- STEP 2: Apply domain validation (blocked domains) if emails remain ----
-                if (hasBlockedDomains && filteredEmails.length > 0) {
-                    // Save length before filtering
-                    const beforeLength = filteredEmails.length;
-                    
-                    // Filter based on blocked domains
-                    filteredEmails = filteredEmails.filter(email => {
-                        const result = this.isDomainValid(email);
-                        // We're only concerned with blockedDomains errors here
-                        return result.isValid || result.errorType !== 'blocked';
-                    });
-                    
-                    // Calculate how many were removed
-                    const blockedCount = beforeLength - filteredEmails.length;
-                    
-                    // Add error message if needed
-                    if (blockedCount > 0) {
-                        if (blockedCount === 1) {
-                            errors.push('1 email with blocked domain was removed.');
-                        } else {
-                            errors.push(`${blockedCount} emails with blocked domains were removed.`);
-                        }
-                    }
-                    
-                    // If no emails remain, stop validation
-                    if (filteredEmails.length === 0) {
-                        this.setError(this.formatErrorMessages(errors));
-                        return;
-                    }
-                }
-                
-                // ---- STEP 3: Check for duplicates with existing emails ----
-                let duplicatesWithExisting = 0;
+                // Filter based on allowed domains
                 filteredEmails = filteredEmails.filter(email => {
-                    // Check against existing emails in the component
-                    const isDuplicate = this.selectedEmails.some(
-                        existingEmail => existingEmail.value.toLowerCase() === email.toLowerCase()
-                    );
-                    
-                    if (isDuplicate) {
-                        duplicatesWithExisting++;
-                        return false;
-                    }
-                    return true;
+                    const result = this.isDomainValid(email);
+                    // We're only concerned with allowedDomains errors here
+                    return result.isValid || result.errorType !== 'allowed';
                 });
                 
-                if (duplicatesWithExisting > 0) {
-                    if (duplicatesWithExisting === 1) {
-                        errors.push('1 duplicate email was skipped.');
+                // Calculate how many were removed
+                const invalidDomainCount = beforeLength - filteredEmails.length;
+                
+                // Add error message if needed
+                if (invalidDomainCount > 0) {
+                    if (invalidDomainCount === 1) {
+                        errors.push('1 email with domain not in the allowed list was removed.');
                     } else {
-                        errors.push(`${duplicatesWithExisting} duplicate emails were skipped.`);
+                        errors.push(`${invalidDomainCount} emails with domains not in the allowed list were removed.`);
                     }
                 }
                 
-                // If no emails remain after duplicate checking, show error and stop
+                // If no emails remain, stop validation
                 if (filteredEmails.length === 0) {
                     this.setError(this.formatErrorMessages(errors));
                     return;
                 }
+            }
+            
+            // ---- STEP 2: Apply domain validation (blocked domains) if emails remain ----
+            if (hasBlockedDomains && filteredEmails.length > 0) {
+                // Save length before filtering
+                const beforeLength = filteredEmails.length;
                 
-                // ---- STEP 4: Apply maximum email limit (only if emails remain) ----
-                const effectiveMaxEmails = this.getEffectiveMaxEmails();
-                const remainingSlots = effectiveMaxEmails - this.selectedEmails.length;
+                // Filter based on blocked domains
+                filteredEmails = filteredEmails.filter(email => {
+                    const result = this.isDomainValid(email);
+                    // We're only concerned with blockedDomains errors here
+                    return result.isValid || result.errorType !== 'blocked';
+                });
                 
-                // Check if we already reached or exceeded the limit
-                if (remainingSlots <= 0) {
-                    if (this.maxEmailsErrorMessage && this.maxEmailsErrorMessage.trim() !== '') {
-                        this.setError(this.maxEmailsErrorMessage);
+                // Calculate how many were removed
+                const blockedCount = beforeLength - filteredEmails.length;
+                
+                // Add error message if needed
+                if (blockedCount > 0) {
+                    if (blockedCount === 1) {
+                        errors.push('1 email with blocked domain was removed.');
                     } else {
-                        this.setError(`You can only add up to ${effectiveMaxEmails} email address${effectiveMaxEmails > 1 ? 'es' : ''}.`);
+                        errors.push(`${blockedCount} emails with blocked domains were removed.`);
                     }
+                }
+                
+                // If no emails remain, stop validation
+                if (filteredEmails.length === 0) {
+                    this.setError(this.formatErrorMessages(errors));
                     return;
                 }
-                
-                // Check if new emails would exceed the limit
-                let truncatedCount = 0;
-                if (filteredEmails.length > remainingSlots) {
-                    truncatedCount = filteredEmails.length - remainingSlots;
-                    filteredEmails = filteredEmails.slice(0, remainingSlots);
-                    
-                    if (this.maxEmailsErrorMessage && this.maxEmailsErrorMessage.trim() !== '') {
-                        errors.push(this.maxEmailsErrorMessage);
-                    } else {
-                        errors.push(`You can only add up to ${effectiveMaxEmails} email address${effectiveMaxEmails > 1 ? 'es' : ''}. ${truncatedCount} excess email${truncatedCount > 1 ? 's were' : ' was'} removed.`);
-                    }
-                }
-                
-                // ---- STEP 5: Check for duplicates within the pasted emails ----
-                const uniqueEmails = new Set();
-                const finalEmails = [];
-                let internalDuplicates = 0;
-                
-                filteredEmails.forEach(email => {
-                    const lowerCase = email.toLowerCase();
-                    if (uniqueEmails.has(lowerCase)) {
-                        internalDuplicates++;
-                    } else {
-                        uniqueEmails.add(lowerCase);
-                        finalEmails.push(email);
-                    }
-                });
-                
-                if (internalDuplicates > 0) {
-                    if (this.duplicateEmailErrorMessage && this.duplicateEmailErrorMessage.trim() !== '') {
-                        errors.push(this.duplicateEmailErrorMessage);
-                    } else {
-                        errors.push(`${internalDuplicates} duplicate email${internalDuplicates > 1 ? 's were' : ' was'} removed from the pasted content.`);
-                    }
-                }
-                
-                // Add the filtered emails to the selection
-                finalEmails.forEach(email => {
-                    const newEmail = {
-                        id: this.generateUniqueId(),
-                        value: email
-                    };
-                    this.selectedEmails = [...this.selectedEmails, newEmail];
-                });
-                
-                // Display error messages if needed
-                if (errors.length > 0) {
-                    this.setError(this.formatErrorMessages(errors));
-                } else {
-                    this.clearErrorState();
-                }
-                
-                // Clear input field
-                this.inputValue = '';
-                this.template.querySelector('input').value = '';
-                
-                // Dispatch change event
-                this.dispatchValueChangedEvent();
-            } else {
-                // Just paste as-is if no valid emails were detected
-                this.inputValue = pastedText;
-                this.template.querySelector('input').value = pastedText;
             }
+            
+            // ---- STEP 3: Check for duplicates with existing emails ----
+            let duplicatesWithExisting = 0;
+            filteredEmails = filteredEmails.filter(email => {
+                // Check against existing emails in the component
+                const isDuplicate = this.selectedEmails.some(
+                    existingEmail => existingEmail.value.toLowerCase() === email.toLowerCase()
+                );
+                
+                if (isDuplicate) {
+                    duplicatesWithExisting++;
+                    return false;
+                }
+                return true;
+            });
+            
+            if (duplicatesWithExisting > 0) {
+                if (duplicatesWithExisting === 1) {
+                    errors.push('1 duplicate email was skipped.');
+                } else {
+                    errors.push(`${duplicatesWithExisting} duplicate emails were skipped.`);
+                }
+            }
+            
+            // If no emails remain after duplicate checking, show error and stop
+            if (filteredEmails.length === 0) {
+                this.setError(this.formatErrorMessages(errors));
+                return;
+            }
+            
+            // ---- STEP 4: Apply maximum email limit (only if emails remain) ----
+            const effectiveMaxEmails = this.getEffectiveMaxEmails();
+            const remainingSlots = effectiveMaxEmails - this.selectedEmails.length;
+            
+            // Check if we already reached or exceeded the limit
+            if (remainingSlots <= 0) {
+                if (this.maxEmailsErrorMessage && this.maxEmailsErrorMessage.trim() !== '') {
+                    this.setError(this.maxEmailsErrorMessage);
+                } else {
+                    this.setError(`You can only add up to ${effectiveMaxEmails} email address${effectiveMaxEmails > 1 ? 'es' : ''}.`);
+                }
+                return;
+            }
+            
+            // Check if new emails would exceed the limit
+            let truncatedCount = 0;
+            if (filteredEmails.length > remainingSlots) {
+                truncatedCount = filteredEmails.length - remainingSlots;
+                filteredEmails = filteredEmails.slice(0, remainingSlots);
+                
+                if (this.maxEmailsErrorMessage && this.maxEmailsErrorMessage.trim() !== '') {
+                    errors.push(this.maxEmailsErrorMessage);
+                } else {
+                    errors.push(`You can only add up to ${effectiveMaxEmails} email address${effectiveMaxEmails > 1 ? 'es' : ''}. ${truncatedCount} excess email${truncatedCount > 1 ? 's were' : ' was'} removed.`);
+                }
+            }
+            
+            // ---- STEP 5: Check for duplicates within the pasted emails ----
+            const uniqueEmails = new Set();
+            const finalEmails = [];
+            let internalDuplicates = 0;
+            
+            filteredEmails.forEach(email => {
+                const lowerCase = email.toLowerCase();
+                if (uniqueEmails.has(lowerCase)) {
+                    internalDuplicates++;
+                } else {
+                    uniqueEmails.add(lowerCase);
+                    finalEmails.push(email);
+                }
+            });
+            
+            if (internalDuplicates > 0) {
+                if (this.duplicateEmailErrorMessage && this.duplicateEmailErrorMessage.trim() !== '') {
+                    errors.push(this.duplicateEmailErrorMessage);
+                } else {
+                    errors.push(`${internalDuplicates} duplicate email${internalDuplicates > 1 ? 's were' : ' was'} removed from the pasted content.`);
+                }
+            }
+            
+            // Add the filtered emails to the selection
+            finalEmails.forEach(email => {
+                const newEmail = {
+                    id: this.generateUniqueId(),
+                    value: email
+                };
+                this.selectedEmails = [...this.selectedEmails, newEmail];
+            });
+            
+            // Display error messages if needed
+            if (errors.length > 0) {
+                this.setError(this.formatErrorMessages(errors));
+            } else {
+                this.clearErrorState();
+            }
+            
+            // Clear input field
+            this.inputValue = '';
+            this.template.querySelector('input').value = '';
+            
+            // Dispatch change event
+            this.dispatchValueChangedEvent();
+        } else {
+            // Just paste as-is if no valid emails were detected
+            this.inputValue = pastedText;
+            this.template.querySelector('input').value = pastedText;
         }
     }
+}
     // ========================
     // EMAIL MANIPULATION METHODS
     // ========================
