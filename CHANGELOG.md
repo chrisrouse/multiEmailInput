@@ -1,11 +1,10 @@
 # Multi Email Input LWC Changelog
 
-## 1.2.1
+## v 1.2.0
+- Add support for pasting email address strings with mixed delimiters.
 - Improve handling of validation rules for default values or copy/pasted values.
 - Fix the order of operations when validating emails and track how many addresses are still in the collection so that confusing errors aren't shown. 
-
-## c 1.2.0
-- Add support for pasting email address strings with mixed delimiters. 
+- Improve wildcard handling. Now you can use wildcard at any position, such as `*google*`, rather than only supporting at the beginning, like `*.google.com`. This now works in allowed and blocked domains.
 
 ## v 1.1.1
 - If no allowed or blocked domain was specified, the component said all emails were invalid. 

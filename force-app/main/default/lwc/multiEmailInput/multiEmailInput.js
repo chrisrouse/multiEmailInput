@@ -774,20 +774,27 @@ isDomainValid(email) {
 }
     
     // Helper method to check if a domain matches a pattern (including wildcards)
-    domainMatchesPattern(domain, pattern) {
-        // If the pattern is an exact match
-        if (domain === pattern) {
-            return true;
-        }
-        
-        // Check for wildcard pattern (e.g., *.example.com)
-        if (pattern.startsWith('*.')) {
-            const patternSuffix = pattern.substring(1); // get the .example.com part
-            return domain.endsWith(patternSuffix);
-        }
-        
-        return false;
+domainMatchesPattern(domain, pattern) {
+    // If the pattern is an exact match
+    if (domain === pattern) {
+        return true;
     }
+    
+    // Check if pattern contains wildcard
+    if (pattern.includes('*')) {
+        // Convert the pattern to a regex pattern
+        // Escape special regex characters except for *
+        const regexPattern = pattern
+            .replace(/[.+?^${}()|[\]\\]/g, '\\$&') // Escape special regex chars
+            .replace(/\*/g, '.*'); // Replace * with .* for regex
+        
+        // Create a RegExp object with the pattern and check if domain matches
+        const regex = new RegExp(`^${regexPattern}$`);
+        return regex.test(domain);
+    }
+    
+    return false;
+}
     
     // Generate a unique ID for each email entry
     generateUniqueId() {
