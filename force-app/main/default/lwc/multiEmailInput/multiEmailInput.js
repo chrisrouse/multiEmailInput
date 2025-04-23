@@ -24,13 +24,29 @@ export default class MultiEmailInput extends LightningElement {
     @track showHelpPopover = false;
     @track popoverPosition = 'bottom'; // Tracks if popover should appear above or below
     
+    _initialValuesSet = false;
+    _pendingInitialValue = null;
+
     // Constants
     ABSOLUTE_MAX_EMAILS = 150;
     
     // Private properties
     _value = [];
     _emailCollection = [];
+    _initialValuesSet = false;
+    _pendingInitialValue = null;
     
+
+    // Add or update the connectedCallback method:
+    connectedCallback() {
+    console.log('Component initialized, maxEmails:', this.maxEmails);
+    
+    // If we have pending initial values to process, do it now
+    if (this._pendingInitialValue && !this._initialValuesSet) {
+        this.processInitialValues(this._pendingInitialValue);
+        this._pendingInitialValue = null;
+    }
+}
     // Get dynamic class for pill container
     get pillContainerClass() {
         return this.selectedEmails.length > 0 
@@ -38,75 +54,200 @@ export default class MultiEmailInput extends LightningElement {
             : 'slds-pill_container';
     }
     
-    // Define getters and setters for input property
-    @api
-    get value() {
-        return this._value;
-    }
+// Define getters and setters for input property
+@api
+get value() {
+    return this._value;
+}
 
-    set value(value) {
-        this._value = value;
-        // Initialize the component with pre-set values
-        if (Array.isArray(value) && value.length > 0 && this.selectedEmails.length === 0) {
-            // Collect validation issues with the initial set
-            const errors = [];
+set value(value) {
+    this._value = value;
+    
+    // If component is initializing and we have values
+    if (Array.isArray(value) && value.length > 0 && this.selectedEmails.length === 0) {
+        console.log('Setting initial value, maxEmails:', this.maxEmails);
+        
+        // If maxEmails is still undefined, store values for later processing
+        if (this.maxEmails === undefined || this.maxEmails === null) {
+            console.log('Max emails not available, storing values for later');
+            this._pendingInitialValue = [...value];
             
-            // Check max emails constraint
-            const effectiveMaxEmails = this.getEffectiveMaxEmails();
-            if (value.length > effectiveMaxEmails) {
-                errors.push(`You can only add up to ${effectiveMaxEmails} email addresses`);
-            }
-            
-            // Check domain validation if needed
-            const validationNeeded = (this.allowedDomains && this.allowedDomains.trim() !== '') || 
-                                     (this.blockedDomains && this.blockedDomains.trim() !== '');
-            
-            if (validationNeeded) {
-                // Find any emails with invalid domains
-                const invalidEmails = value.filter(email => {
-                    const result = this.isDomainValid(email);
-                    return !result.isValid;
-                });
+            // Delay processing to allow Flow to initialize properties
+            setTimeout(() => {
+                console.log('Rechecking maxEmails after delay:', this.maxEmails);
                 
-                if (invalidEmails.length > 0) {
-                    // Get the specific validation message for the first invalid email
-                    if (invalidEmails.length === 1) {
-                        const validationResult = this.isDomainValid(invalidEmails[0]);
-                        if (validationResult.message) {
-                            errors.push(validationResult.message);
-                        } else {
-                            errors.push('Email domain is not allowed.');
-                        }
-                    } else {
-                        errors.push('One or more emails has an invalid domain.');
-                    }
+                // Only process if we haven't already and still have pending values
+                if (!this._initialValuesSet && this._pendingInitialValue) {
+                    this.processInitialValues(this._pendingInitialValue);
+                    this._pendingInitialValue = null;
                 }
+            }, 250);
+        } else {
+            // Process immediately if maxEmails is available
+            this.processInitialValues(value);
+        }
+    }
+}
+    
+// New method to process initial values with improved validation order
+processInitialValues(value) {
+    console.log('Processing initial values, maxEmails:', this.maxEmails);
+    
+    // Mark that we've processed initial values to avoid duplicates
+    this._initialValuesSet = true;
+    
+    // Collect validation issues with the initial set
+    const errors = [];
+    let filteredEmails = [...value]; // Create a copy to avoid modifying the original
+    
+    // ---- STEP 1: Apply domain validation first (allowed domains) ----
+    const hasAllowedDomains = this.allowedDomains && this.allowedDomains.trim() !== '';
+    const hasBlockedDomains = this.blockedDomains && this.blockedDomains.trim() !== '';
+    
+    // Process allowed domains first
+    if (hasAllowedDomains) {
+        // Save length before filtering
+        const beforeLength = filteredEmails.length;
+        
+        // Filter based on allowed domains
+        filteredEmails = filteredEmails.filter(email => {
+            const result = this.isDomainValid(email);
+            // We're only concerned with allowedDomains errors here
+            return result.isValid || result.errorType !== 'allowed';
+        });
+        
+        // Calculate how many were removed
+        const invalidDomainCount = beforeLength - filteredEmails.length;
+        
+        // Add error message if needed
+        if (invalidDomainCount > 0) {
+            if (invalidDomainCount === 1) {
+                errors.push('1 email with domain not in the allowed list was removed.');
+            } else {
+                errors.push(`${invalidDomainCount} emails with domains not in the allowed list were removed.`);
             }
-            
-            // Set error state if needed
-            if (errors.length > 0) {
-                this.hasError = true;
-                
-                // Show combined error message if multiple issues
-                if (errors.length === 1) {
-                    this.errorMessage = errors[0];
-                } else {
-                    this.errorMessage = '<ul style="margin-left: 1rem; list-style-type: disc;">' + 
-                        errors.map(err => `<li>${err}</li>`).join('') + 
-                        '</ul>';
-                }
-            }
-            
-            // Always set the emails, but respect the maxEmails limit
-            let emailsToSet = value;
-            if (value.length > effectiveMaxEmails) {
-                emailsToSet = value.slice(0, effectiveMaxEmails);
-            }
-            
-            this.setEmails(emailsToSet);
+        }
+        
+        // If no emails remain, stop validation
+        if (filteredEmails.length === 0) {
+            this.setError(errors[0]); // Only show allowed domains error
+            this.setEmails([]);
+            return;
         }
     }
     
+    // ---- STEP 2: Apply domain validation (blocked domains) if emails remain ----
+    if (hasBlockedDomains && filteredEmails.length > 0) {
+        // Save length before filtering
+        const beforeLength = filteredEmails.length;
+        
+        // Filter based on blocked domains
+        filteredEmails = filteredEmails.filter(email => {
+            const result = this.isDomainValid(email);
+            // We're only concerned with blockedDomains errors here
+            return result.isValid || result.errorType !== 'blocked';
+        });
+        
+        // Calculate how many were removed
+        const blockedCount = beforeLength - filteredEmails.length;
+        
+        // Add error message if needed
+        if (blockedCount > 0) {
+            if (blockedCount === 1) {
+                errors.push('1 email with blocked domain was removed.');
+            } else {
+                errors.push(`${blockedCount} emails with blocked domains were removed.`);
+            }
+        }
+        
+        // If no emails remain, stop validation
+        if (filteredEmails.length === 0) {
+            // Only show domain-related errors
+            this.setError(this.formatErrorMessages(errors));
+            this.setEmails([]);
+            return;
+        }
+    }
+    
+    // ---- STEP 3: Apply maximum email limit (only if emails remain) ----
+    if (filteredEmails.length > 0) {
+        const effectiveMaxEmails = this.getEffectiveMaxEmails();
+        console.log('Effective Max Emails for initial values:', effectiveMaxEmails);
+        console.log('Domain-filtered values length:', filteredEmails.length);
+        
+        // Check if we're over the max limit
+        if (filteredEmails.length > effectiveMaxEmails) {
+            const truncatedCount = filteredEmails.length - effectiveMaxEmails;
+            filteredEmails = filteredEmails.slice(0, effectiveMaxEmails);
+            
+            // Add error message for max limit
+            if (this.maxEmailsErrorMessage && this.maxEmailsErrorMessage.trim() !== '') {
+                errors.push(this.maxEmailsErrorMessage);
+            } else {
+                errors.push(`You can only add up to ${effectiveMaxEmails} email address${effectiveMaxEmails > 1 ? 'es' : ''}. ${truncatedCount} excess email${truncatedCount > 1 ? 's were' : ' was'} removed.`);
+            }
+        }
+    }
+    
+    // ---- STEP 4: Check for duplicates (only if emails remain) ----
+    if (filteredEmails.length > 0) {
+        const uniqueEmails = new Set();
+        const finalEmails = [];
+        let duplicateCount = 0;
+        
+        filteredEmails.forEach(email => {
+            const lowerCase = email.toLowerCase();
+            if (uniqueEmails.has(lowerCase)) {
+                duplicateCount++;
+            } else {
+                uniqueEmails.add(lowerCase);
+                finalEmails.push(email);
+            }
+        });
+        
+        filteredEmails = finalEmails;
+        
+        if (duplicateCount > 0) {
+            if (this.duplicateEmailErrorMessage && this.duplicateEmailErrorMessage.trim() !== '') {
+                errors.push(this.duplicateEmailErrorMessage);
+            } else {
+                errors.push(`${duplicateCount} duplicate email${duplicateCount > 1 ? 's were' : ' was'} removed.`);
+            }
+        }
+    }
+    
+    // Set error state if needed
+    if (errors.length > 0) {
+        this.hasError = true;
+        this.errorMessage = this.formatErrorMessages(errors);
+    } else {
+        this.clearErrorState();
+    }
+    
+    // Set the emails, using the final filtered list
+    console.log('Setting filtered emails:', filteredEmails.length);
+    this.setEmails(filteredEmails);
+}
+
+// Helper method to format error messages
+formatErrorMessages(errors) {
+    if (errors.length === 0) {
+        return '';
+    } else if (errors.length === 1) {
+        return errors[0];
+    } else {
+        return '<ul style="margin-left: 1rem; list-style-type: disc;">' + 
+            errors.map(err => `<li>${err}</li>`).join('') + 
+            '</ul>';
+    }
+}
+
+// Helper method to set error
+setError(message) {
+    this.hasError = true;
+    this.errorMessage = message;
+}
+
     // Define getter and setter for output property
     @api
     get emailCollection() {
@@ -124,18 +265,32 @@ export default class MultiEmailInput extends LightningElement {
         return this._emailCollection.join(',');
     }
     
-    // Gets the effective maximum number of emails allowed
-    getEffectiveMaxEmails() {
-        // If a maxEmails value is provided and is a valid number between 0 and ABSOLUTE_MAX_EMAILS, use it
-        if (this.maxEmails !== undefined && this.maxEmails !== null) {
-            const parsedMax = parseInt(this.maxEmails, 10);
-            if (!isNaN(parsedMax) && parsedMax >= 0 && parsedMax <= this.ABSOLUTE_MAX_EMAILS) {
-                return parsedMax;
-            }
+// Gets the effective maximum number of emails allowed
+getEffectiveMaxEmails() {
+    // Debug the incoming value
+    console.log('Raw maxEmails value:', this.maxEmails, 'Type:', typeof this.maxEmails);
+    
+    // If a maxEmails value is provided, attempt to parse it properly
+    if (this.maxEmails !== undefined && this.maxEmails !== null) {
+        // Flow often passes numbers as strings, so we need to handle both cases
+        let parsedMax = this.maxEmails;
+        
+        // If it's a string, parse it to a number
+        if (typeof this.maxEmails === 'string') {
+            parsedMax = parseInt(this.maxEmails, 10);
         }
-        // Otherwise, use the absolute maximum
-        return this.ABSOLUTE_MAX_EMAILS;
+        
+        console.log('Parsed maxEmails:', parsedMax);
+        
+        // Verify it's a valid number in the acceptable range
+        if (!isNaN(parsedMax) && parsedMax >= 0 && parsedMax <= this.ABSOLUTE_MAX_EMAILS) {
+            return parsedMax;
+        }
     }
+    
+    // Otherwise, use the absolute maximum
+    return this.ABSOLUTE_MAX_EMAILS;
+}
          
     // Check if error message contains HTML tags (rich text)
     get isRichTextError() {
@@ -181,7 +336,7 @@ export default class MultiEmailInput extends LightningElement {
         }
     }
     
-    // Handle paste events for multiple emails
+// Handle paste events for multiple emails with improved validation logic
 handlePaste(event) {
     // Don't process if disabled
     if (this.disabled) return;
@@ -215,44 +370,187 @@ handlePaste(event) {
         
         // Process emails if we found any
         if (emails.length > 0) {
-            // Calculate how many emails we can add (respect max limit)
+            // Collect validation issues
+            const errors = [];
+            
+            // Filter out emails with invalid format
+            let filteredEmails = emails.filter(email => this.isValidEmail(email));
+            
+            // If some emails had invalid format, add an error message
+            const invalidFormatCount = emails.length - filteredEmails.length;
+            if (invalidFormatCount > 0) {
+                if (invalidFormatCount === 1) {
+                    errors.push('1 email with invalid format was removed.');
+                } else {
+                    errors.push(`${invalidFormatCount} emails with invalid format were removed.`);
+                }
+                
+                // If no valid emails remain, show error and stop
+                if (filteredEmails.length === 0) {
+                    this.setError(errors[0]);
+                    return;
+                }
+            }
+            
+            // ---- STEP 1: Apply domain validation first (allowed domains) ----
+            const hasAllowedDomains = this.allowedDomains && this.allowedDomains.trim() !== '';
+            const hasBlockedDomains = this.blockedDomains && this.blockedDomains.trim() !== '';
+            
+            // Process allowed domains first
+            if (hasAllowedDomains) {
+                // Save length before filtering
+                const beforeLength = filteredEmails.length;
+                
+                // Filter based on allowed domains
+                filteredEmails = filteredEmails.filter(email => {
+                    const result = this.isDomainValid(email);
+                    // We're only concerned with allowedDomains errors here
+                    return result.isValid || result.errorType !== 'allowed';
+                });
+                
+                // Calculate how many were removed
+                const invalidDomainCount = beforeLength - filteredEmails.length;
+                
+                // Add error message if needed
+                if (invalidDomainCount > 0) {
+                    if (invalidDomainCount === 1) {
+                        errors.push('1 email with domain not in the allowed list was removed.');
+                    } else {
+                        errors.push(`${invalidDomainCount} emails with domains not in the allowed list were removed.`);
+                    }
+                }
+                
+                // If no emails remain, stop validation
+                if (filteredEmails.length === 0) {
+                    this.setError(this.formatErrorMessages(errors));
+                    return;
+                }
+            }
+            
+            // ---- STEP 2: Apply domain validation (blocked domains) if emails remain ----
+            if (hasBlockedDomains && filteredEmails.length > 0) {
+                // Save length before filtering
+                const beforeLength = filteredEmails.length;
+                
+                // Filter based on blocked domains
+                filteredEmails = filteredEmails.filter(email => {
+                    const result = this.isDomainValid(email);
+                    // We're only concerned with blockedDomains errors here
+                    return result.isValid || result.errorType !== 'blocked';
+                });
+                
+                // Calculate how many were removed
+                const blockedCount = beforeLength - filteredEmails.length;
+                
+                // Add error message if needed
+                if (blockedCount > 0) {
+                    if (blockedCount === 1) {
+                        errors.push('1 email with blocked domain was removed.');
+                    } else {
+                        errors.push(`${blockedCount} emails with blocked domains were removed.`);
+                    }
+                }
+                
+                // If no emails remain, stop validation
+                if (filteredEmails.length === 0) {
+                    this.setError(this.formatErrorMessages(errors));
+                    return;
+                }
+            }
+            
+            // ---- STEP 3: Check for duplicates with existing emails ----
+            let duplicatesWithExisting = 0;
+            filteredEmails = filteredEmails.filter(email => {
+                // Check against existing emails in the component
+                const isDuplicate = this.selectedEmails.some(
+                    existingEmail => existingEmail.value.toLowerCase() === email.toLowerCase()
+                );
+                
+                if (isDuplicate) {
+                    duplicatesWithExisting++;
+                    return false;
+                }
+                return true;
+            });
+            
+            if (duplicatesWithExisting > 0) {
+                if (duplicatesWithExisting === 1) {
+                    errors.push('1 duplicate email was skipped.');
+                } else {
+                    errors.push(`${duplicatesWithExisting} duplicate emails were skipped.`);
+                }
+            }
+            
+            // If no emails remain after duplicate checking, show error and stop
+            if (filteredEmails.length === 0) {
+                this.setError(this.formatErrorMessages(errors));
+                return;
+            }
+            
+            // ---- STEP 4: Apply maximum email limit (only if emails remain) ----
             const effectiveMaxEmails = this.getEffectiveMaxEmails();
             const remainingSlots = effectiveMaxEmails - this.selectedEmails.length;
             
+            // Check if we already reached or exceeded the limit
             if (remainingSlots <= 0) {
                 if (this.maxEmailsErrorMessage && this.maxEmailsErrorMessage.trim() !== '') {
                     this.setError(this.maxEmailsErrorMessage);
                 } else {
-                    this.setError(`You can only add up to ${effectiveMaxEmails} email addresses.`);
+                    this.setError(`You can only add up to ${effectiveMaxEmails} email address${effectiveMaxEmails > 1 ? 'es' : ''}.`);
                 }
                 return;
             }
             
-            // Calculate how many emails we can add
-            const emailsToAdd = emails.slice(0, remainingSlots);
-            
-            // Add emails without validation (as per requirements)
-            let duplicatesSkipped = 0;
-            emailsToAdd.forEach(email => {
-                // Skip duplicates silently
-                if (this.selectedEmails.some(item => item.value.toLowerCase() === email.toLowerCase())) {
-                    duplicatesSkipped++;
+            // Check if new emails would exceed the limit
+            let truncatedCount = 0;
+            if (filteredEmails.length > remainingSlots) {
+                truncatedCount = filteredEmails.length - remainingSlots;
+                filteredEmails = filteredEmails.slice(0, remainingSlots);
+                
+                if (this.maxEmailsErrorMessage && this.maxEmailsErrorMessage.trim() !== '') {
+                    errors.push(this.maxEmailsErrorMessage);
                 } else {
-                    // Add email without validation
-                    const newEmail = {
-                        id: this.generateUniqueId(),
-                        value: email
-                    };
-                    this.selectedEmails = [...this.selectedEmails, newEmail];
+                    errors.push(`You can only add up to ${effectiveMaxEmails} email address${effectiveMaxEmails > 1 ? 'es' : ''}. ${truncatedCount} excess email${truncatedCount > 1 ? 's were' : ' was'} removed.`);
+                }
+            }
+            
+            // ---- STEP 5: Check for duplicates within the pasted emails ----
+            const uniqueEmails = new Set();
+            const finalEmails = [];
+            let internalDuplicates = 0;
+            
+            filteredEmails.forEach(email => {
+                const lowerCase = email.toLowerCase();
+                if (uniqueEmails.has(lowerCase)) {
+                    internalDuplicates++;
+                } else {
+                    uniqueEmails.add(lowerCase);
+                    finalEmails.push(email);
                 }
             });
             
-            // Provide appropriate feedback
-            if (emails.length > remainingSlots) {
-                this.setError(`Only ${remainingSlots} of ${emails.length} emails were added due to the maximum limit of ${effectiveMaxEmails}.`);
-            } 
-            else if (duplicatesSkipped > 0) {
-                this.setError(`${duplicatesSkipped} duplicate email${duplicatesSkipped > 1 ? 's were' : ' was'} skipped.`);
+            if (internalDuplicates > 0) {
+                if (this.duplicateEmailErrorMessage && this.duplicateEmailErrorMessage.trim() !== '') {
+                    errors.push(this.duplicateEmailErrorMessage);
+                } else {
+                    errors.push(`${internalDuplicates} duplicate email${internalDuplicates > 1 ? 's were' : ' was'} removed from the pasted content.`);
+                }
+            }
+            
+            // Add the filtered emails to the selection
+            finalEmails.forEach(email => {
+                const newEmail = {
+                    id: this.generateUniqueId(),
+                    value: email
+                };
+                this.selectedEmails = [...this.selectedEmails, newEmail];
+            });
+            
+            // Display error messages if needed
+            if (errors.length > 0) {
+                this.setError(this.formatErrorMessages(errors));
+            } else {
+                this.clearErrorState();
             }
             
             // Clear input field
@@ -268,9 +566,6 @@ handlePaste(event) {
         }
     }
 }
-
-
-
     // Handle input event to clear error state immediately on any input
     handleInput(event) {
         if (!this.disabled) {
@@ -637,21 +932,36 @@ collectValidationErrors() {
             return true;
         }
     }
-    
-    // Keep the original validate method for backward compatibility
     @api
     validate() {
+        // First backup the current collection
+        const backupCollection = JSON.parse(JSON.stringify(this.selectedEmails));
+        
         // Perform full validation using reportValidity
         const isValid = this.reportValidity();
         
-        if (isValid) {
-            return { isValid: true };
-        } else {
+        if (!isValid) {
+            // Schedule restoration after Flow processing
+            setTimeout(() => {
+                // Only restore if component is still in the DOM
+                if (this.template.querySelector('input')) {
+                    // Restore the collection from backup
+                    this.selectedEmails = backupCollection;
+                    // Update internal collections without dispatching events
+                    this._value = this.selectedEmails.map(email => email.value);
+                    this._emailCollection = this._value;
+                }
+            }, 0);
+            
+            // Return invalid status to prevent navigation
             return { 
                 isValid: false,
                 errorMessage: this.errorMessage
             };
         }
+        
+        // If validation passes, continue normally
+        return { isValid: true };
     }
 
     // Toggle help popover visibility
