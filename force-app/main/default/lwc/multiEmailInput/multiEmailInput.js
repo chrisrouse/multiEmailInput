@@ -1013,13 +1013,13 @@ handlePaste(event) {
         this.dispatchEvent(new FlowAttributeChangeEvent('emailCollection', emailValues));
         
         // Also dispatch a Flow attribute change event for the comma-delimited email list
-        this.dispatchEvent(new FlowAttributeChangeEvent('emailList', emailValues.join(',')));
+        this.dispatchEvent(new FlowAttributeChangeEvent('emailList', emailValues.join(', ')));
         
         // Also dispatch a regular event for non-Flow usages
         this.dispatchEvent(new CustomEvent('emailschanged', {
             detail: {
                 emails: emailValues,
-                emailList: emailValues.join(',')
+                emailList: emailValues.join(', ')
             }
         }));
     }
